@@ -17,5 +17,5 @@ RUN ldconfig
 
 RUN cd ..
 
-ADD .. /worldsim
+ADD . /worldsim
 WORKDIR /worldsim
