@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install --assume-yes apt-utils
 RUN apt-get -y update && apt-get -y install gcc g++ make git wget autoconf libtool automake python pkg-config
 RUN apt-get -y install postgresql build-essential libpq-dev libpqxx-dev
 
-
 EXPOSE 1234
 EXPOSE 2345
 
@@ -19,3 +18,4 @@ RUN cd ..
 
 ADD . /worldsim
 WORKDIR /worldsim
+RUN chmod +x server
