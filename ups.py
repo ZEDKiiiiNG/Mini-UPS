@@ -17,8 +17,23 @@ if __name__ == "__main__":
         _EncodeVarint(world_fd.sendall, len(u_connect_str), None)
         world_fd.sendall(u_connect_str)
 
-        msg = world_fd.recv(1024)
+        var_int_buff = []
+        while True:
+            buf = world_fd.recv(1)
+            var_int_buff += buf
+            msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
+            if new_pos != 0:
+                break
+        whole_message_str = world_fd.recv(msg_len)
+
+        # msg = world_fd.recv(1024)
+        # print(len(msg))
+        # msg_len, new_pos = _DecodeVarint32(msg, 0)
+        # print("here {}, {}".format(msg_len, new_pos))
+        # msg = msg[:msg_len]
+
+
         u_connected = world_ups_pb2.UConnected()
-        u_connected.ParseFromString(msg)
+        u_connected.ParseFromString(whole_message_str)
         print("world id: {}".format(u_connected.worldid))
         print("result: {}".format(u_connected.result))
