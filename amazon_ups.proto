@@ -21,7 +21,7 @@ message Product{
 message ATruckReq {
     required Warehouse wh = 1;
     required int64 packageid = 2;
-    repeated Product products = 3;
+    repeated Product things = 3;
     required int32 seqnum = 4;
 }
 
