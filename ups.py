@@ -16,6 +16,7 @@ def send_msg(fd, msg):
 
 def recv_msg(fd, msg_type):
     msg_str = fd.recv(MSG_LEN)
+    print(msg_str)
     msg = msg_type()
     msg.ParseFromString(msg_str[1:])
     return msg
@@ -59,6 +60,23 @@ def send_world_id(amazon_fd, world_id, seq, exp_seqs):
     return
 
 
+def handle_service(world_fd, amazon_fd, seq, exp_seqs):
+    while True:
+        ready_fds = select.select([world_fd, amazon_fd], [], [], 0)
+        if amazon_fd in ready_fds:
+            a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
+            for ack in a_msg.acks:
+                if ack in exp_seqs:
+                    exp_seqs.pop(ack)
+        for seq in exp_seqs:
+            fd, msg, time_sent = exp_seqs[seq]
+            if time.time() - time_sent >= RETRY_INTERVAL:
+                print(msg)
+                send_msg(fd, msg)
+                # exp_seqs.pop(seq)
+    return
+
+
 def main():
     seq = 0
     ack_seqs = set()
@@ -70,6 +88,7 @@ def main():
     amazon_fd, _ = listen_fd.accept()
     send_world_id(amazon_fd, world_id, seq, exp_seqs)
     seq += 1
+    handle_service(world_fd, amazon_fd, seq, exp_seqs)
     return
 
 
