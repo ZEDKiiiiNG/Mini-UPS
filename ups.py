@@ -73,6 +73,7 @@ def handle_service(world_fd, amazon_fd, seq, exp_seqs):
             if time.time() - time_sent >= RETRY_INTERVAL:
                 print(msg)
                 send_msg(fd, msg)
+                exp_seqs[seq] = [fd, msg, time.time()]
                 # exp_seqs.pop(seq)
     return
 
