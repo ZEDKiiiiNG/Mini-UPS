@@ -14,6 +14,13 @@ def send_msg(fd, msg):
     fd.sendall(msg_str)
     return
 
+def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
+    msg.seqnum = curr_seq[0]
+    send_msg(fd, msg)
+    exp_seqs[curr_seq[0]] = [fd, msg, time.time()]
+    curr_seq[0] += 1
+    return
+
 
 def recv_msg(fd, msg_type):
     temp = fd.recv(1)
@@ -55,9 +62,13 @@ def connect_world(world_fd):
     print("world id: {}".format(world_id))
     return world_id
 
-def send_pickup(world_fd):
-    return
 
+def send_pickup(world_fd, curr_seq, exp_seqs, whid):
+    u_msg = amazon_ups_pb2.UMsg()
+    u_msg.truckid = 2  # TODO truck_id = db.get_pickup_truck()
+    u_msg.whid = whid
+    send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
+    return
 
 
 def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
@@ -84,15 +95,16 @@ def handle_resend(exp_seqs):
             exp_seqs[seq] = [fd, msg, curr_time]
     return
 
-def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, msg):
-    for truck_req in msg.truckreq:
+def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
+    for truck_req in a_msg.truckreq:
         print(truck_req)
-        # wh, ups_account, package_id, thing, seq = truck_req
-        # print("{}, {}, {}, {}, {}".format(wh, ups_account, package_id, thing, seq))
-        # send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
-        # if seq not in ack_seqs:
-        #
-        #     ack_seqs.add(seq)
+        seq = truck_req.seqnum
+        send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
+        if seq not in ack_seqs:
+            ack_seqs.add(seq)
+            # TODO db.save_package()
+            send_pickup(world_fd, curr_seq,)
+
     return
 
 def send_ack(fd, seq, msg_type):
