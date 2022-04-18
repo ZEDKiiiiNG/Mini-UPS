@@ -20,18 +20,18 @@ message Product{
 
 message ATruckReq {
     required Warehouse wh = 1;
-    required int64 packageid = 2;
-    repeated Product things = 3;
-    required int32 seqnum = 4;
+    optional string upsaccount = 2;
+    required int64 packageid = 3;
+     repeated Product things = 4;
+    required int32 seqnum = 5;
 }
 
 message ADeliverReq {
     required int64 packageid = 1;
-    optional int32 upsaccount = 2;
-    required int32 truckid = 3;
-    required int32 dest_x = 4;
-    required int32 dest_y = 5;
-    required int32 seqnum = 6;
+    required int32 truckid = 2;
+    required int32 dest_x = 3;
+    required int32 dest_y = 4;
+    required int32 seqnum = 5;
 }
 
 message UDeliverRsp{
