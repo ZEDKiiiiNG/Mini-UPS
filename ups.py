@@ -6,11 +6,13 @@ import amazon_ups_pb2
 import time
 import select
  
+
 def send_msg(fd, msg):
     msg_str = msg.SerializeToString()
     _EncodeVarint(fd.sendall, len(msg_str), None)
     fd.sendall(msg_str)
     return
+
 
 def recv_msg(fd, msg_type):
     msg_str = fd.recv(MSG_LEN)
@@ -18,16 +20,19 @@ def recv_msg(fd, msg_type):
     msg.ParseFromString(msg_str[1:])
     return msg
 
+
 def build_server(host, port):
     fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     fd.bind((host, port))
     fd.listen(1)
     return fd
 
+
 def build_client(host, port):
     fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     fd.connect((host, port))
     return fd
+
 
 def connect_world(world_fd):
     # ups send UConnect to world
@@ -45,13 +50,14 @@ def connect_world(world_fd):
     print("world id: {}".format(world_id))
     return world_id
 
+
 def send_world_id(amazon_fd, world_id, seq, exp_seqs):
-    u_msg = amazon_ups_pb2.U2AWorldId()
-    u_msg.worldid = world_id
-    u_msg.seqnum = seq
+    u_msg = amazon_ups_pb2.UMsg()
+    u_msg.worldid.add(worldid=world_id, seqnum=seq)
     send_msg(amazon_fd, u_msg)
     exp_seqs[seq] = [amazon_fd, u_msg, time.time()]
     return
+
 
 def main():
     seq = 0
@@ -65,6 +71,7 @@ def main():
     send_world_id(amazon_fd, world_id, seq, exp_seqs)
     seq += 1
     return
+
 
 if __name__ == "__main__":
     main()
