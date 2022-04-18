@@ -63,6 +63,12 @@ def send_world_id(amazon_fd, world_id, seq, exp_seqs):
     exp_seqs[seq] = [amazon_fd, u_msg, time.time()]
     return
 
+def handle_acks(msg, exp_seqs):
+    for ack in msg.acks:
+        print("ack: {}".format(ack))
+        if ack in exp_seqs:
+            exp_seqs.pop(ack)
+    return
 
 def run_service(world_fd, amazon_fd, seq, exp_seqs):
     while True:
@@ -71,10 +77,7 @@ def run_service(world_fd, amazon_fd, seq, exp_seqs):
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
             if not a_msg: # receive empty msg if amazon close connection
                 continue
-            for ack in a_msg.acks:
-                print("ack: {}".format(ack))
-                if ack in exp_seqs:
-                    exp_seqs.pop(ack)
+            handle_acks(a_msg, exp_seqs)
         for seq in exp_seqs:
             fd, msg, time_sent = exp_seqs[seq]
             curr_time = time.time()
