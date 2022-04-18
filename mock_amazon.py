@@ -20,7 +20,20 @@ def test_send_world_id(ups_fd):
         ups.send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
     return
 
+def test_truck_req(ups_fd):
+    a_msg = amazon_ups_pb2.AMsg()
+    truck_req = a_msg.truckreq.add(upsaccount="test_user", packageid=2, seqnum=3)
+    # only have add() for repeated field
+    truck_req.wh.id = 6
+    truck_req.wh.x = 7
+    truck_req.wh.y = 8
+    truck_req.things.add(id=4, description="banana", count=5)
+    ups.send_msg(ups_fd, a_msg)
+    return
+
+
 if __name__ == "__main__":
     ups_fd = ups.build_client(UPS_HOST, UPS_PORT)
     # test_resend(ups_fd)
     test_send_world_id(ups_fd)
+    test_truck_req(ups_fd)

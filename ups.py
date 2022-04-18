@@ -55,6 +55,10 @@ def connect_world(world_fd):
     print("world id: {}".format(world_id))
     return world_id
 
+def send_pickup(world_fd):
+    return
+
+
 
 def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     u_msg = amazon_ups_pb2.UMsg()
@@ -80,7 +84,15 @@ def handle_resend(exp_seqs):
             exp_seqs[seq] = [fd, msg, curr_time]
     return
 
-def handle_truck_req(msg, curr_seq, exp_seqs, ack_seqs):
+def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, msg):
+    for truck_req in msg.truckreq:
+        print(truck_req)
+        # wh, ups_account, package_id, thing, seq = truck_req
+        # print("{}, {}, {}, {}, {}".format(wh, ups_account, package_id, thing, seq))
+        # send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
+        # if seq not in ack_seqs:
+        #
+        #     ack_seqs.add(seq)
     return
 
 def send_ack(fd, seq, msg_type):
@@ -97,6 +109,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             if not a_msg: # receive empty msg if amazon close connection
                 continue
             handle_acks(a_msg, exp_seqs)
+            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         handle_resend(exp_seqs)
     return
 
@@ -106,10 +119,12 @@ def main():
     ack_seqs = set()
     exp_seqs = {}
 
-    world_fd = build_client(WORLD_HOST, WORLD_PORT)
-    world_id = connect_world(world_fd)
     listen_fd = build_server(UPS_HOST, UPS_PORT)
     amazon_fd, _ = listen_fd.accept()
+    # TODO open thread to serve each amazon
+    world_fd = build_client(WORLD_HOST, WORLD_PORT)
+    world_id = connect_world(world_fd)
+
     send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
     run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs)
     return
