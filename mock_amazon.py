@@ -6,6 +6,7 @@ import amazon_ups_pb2
 def main():
     ups_fd = ups.build_client(UPS_HOST, UPS_PORT)
     u_msg = ups.recv_msg(ups_fd, amazon_ups_pb2.UMsg)
+    print(u_msg)
     world_id = u_msg.worldid.worldid
     seq = u_msg.worldid.seqnum
     print("world id: {}".format(world_id))
