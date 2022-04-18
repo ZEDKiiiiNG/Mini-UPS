@@ -29,10 +29,17 @@ def send_with_retry(fd, msg, msg_type, ack_seqs):
                 return
     return send_with_retry(fd, msg, msg_type, ack_seqs)
 
-# def start_server():
+def build_server(host, port):
+    fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    fd.bind((host, port))
+    fd.listen(1)
+    return fd
 
+def build_client(host, port):
+    fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    fd.connect((host, port))
+    return fd
 
-# return world_id
 def connect_world(world_fd):
     # ups send UConnect to world
     u_msg = world_ups_pb2.UConnect()
@@ -56,21 +63,17 @@ def send_world_id(amazon_fd, world_id, seq_num, ack_seqs):
     send_with_retry(amazon_fd, u_msg, amazon_ups_pb2.AMsg, ack_seqs)
     return
 
-
-
 def main():
     seq_num = 0
     ack_seqs = set()
-    world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    world_fd.connect((WORLD_HOST, WORLD_PORT))
-    connect_world(world_fd)
 
-    # listen_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # listen_fd.bind(UPS_HOST, UPS_PORT)
-    # listen_fd.listen(1)
-    # amazon_fd, _ = listen_fd.accept()
-
-
+    world_fd = build_client(WORLD_HOST, WORLD_PORT)
+    world_id = connect_world(world_fd)
+    listen_fd = build_server(UPS_HOST, UPS_PORT)
+    amazon_fd, _ = listen_fd.accept()
+    send_world_id(amazon_fd, world_id, seq_num, ack_seqs)
+    seq_num += 1
+    return
 
 if __name__ == "__main__":
     main()
