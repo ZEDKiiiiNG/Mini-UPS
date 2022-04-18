@@ -56,11 +56,12 @@ def connect_world(world_fd):
     return world_id
 
 
-def send_world_id(amazon_fd, world_id, seq, exp_seqs):
+def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     u_msg = amazon_ups_pb2.UMsg()
-    u_msg.worldid.add(worldid=world_id, seqnum=seq)
+    u_msg.worldid.add(worldid=world_id, seqnum=curr_seq[0])
     send_msg(amazon_fd, u_msg)
-    exp_seqs[seq] = [amazon_fd, u_msg, time.time()]
+    exp_seqs[curr_seq[0]] = [amazon_fd, u_msg, time.time()]
+    curr_seq[0] += 1
     return
 
 def handle_acks(msg, exp_seqs):
@@ -79,7 +80,10 @@ def handle_resend(exp_seqs):
             exp_seqs[seq] = [fd, msg, curr_time]
     return
 
-def run_service(world_fd, amazon_fd, seq, exp_seqs):
+def handle_truck_req(msg, curr_seq, exp_seqs, ack_seqs):
+    return
+
+def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
@@ -92,7 +96,7 @@ def run_service(world_fd, amazon_fd, seq, exp_seqs):
 
 
 def main():
-    seq = 0
+    curr_seq = [0]
     ack_seqs = set()
     exp_seqs = {}
 
@@ -100,9 +104,8 @@ def main():
     world_id = connect_world(world_fd)
     listen_fd = build_server(UPS_HOST, UPS_PORT)
     amazon_fd, _ = listen_fd.accept()
-    send_world_id(amazon_fd, world_id, seq, exp_seqs)
-    seq += 1
-    run_service(world_fd, amazon_fd, seq, exp_seqs)
+    send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
+    run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs)
     return
 
 
