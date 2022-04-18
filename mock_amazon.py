@@ -20,7 +20,6 @@ def test_send_world_id(ups_fd):
         a_msg = amazon_ups_pb2.AMsg()
         a_msg.acks.append(seq)
         ups.send_msg(ups_fd, a_msg)
-        time.sleep(10)
     return
 
 if __name__ == "__main__":

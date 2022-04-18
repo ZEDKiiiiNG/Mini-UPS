@@ -16,7 +16,10 @@ def send_msg(fd, msg):
 
 
 def recv_msg(fd, msg_type):
-    msg_len, _ = _DecodeVarint32(fd.recv(1), 0)
+    temp = fd.recv(1)
+    if not temp:
+        return temp
+    msg_len, _ = _DecodeVarint32(temp, 0)
     msg = msg_type()
     msg_str = fd.recv(msg_len)
     msg.ParseFromString(msg_str)
@@ -66,6 +69,8 @@ def run_service(world_fd, amazon_fd, seq, exp_seqs):
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
+            if not a_msg: # receive empty msg if amazon close connection
+                continue
             for ack in a_msg.acks:
                 print("ack: {}".format(ack))
                 if ack in exp_seqs:
