@@ -61,12 +61,13 @@ def send_world_id(amazon_fd, world_id, seq, exp_seqs):
     return
 
 
-def handle_service(world_fd, amazon_fd, seq, exp_seqs):
+def run_service(world_fd, amazon_fd, seq, exp_seqs):
     while True:
-        ready_fds = select.select([world_fd, amazon_fd], [], [], 0)
+        ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
             for ack in a_msg.acks:
+                print("ack: {}".format(ack))
                 if ack in exp_seqs:
                     exp_seqs.pop(ack)
         for seq in exp_seqs:
@@ -89,7 +90,7 @@ def main():
     amazon_fd, _ = listen_fd.accept()
     send_world_id(amazon_fd, world_id, seq, exp_seqs)
     seq += 1
-    handle_service(world_fd, amazon_fd, seq, exp_seqs)
+    run_service(world_fd, amazon_fd, seq, exp_seqs)
     return
 
 
