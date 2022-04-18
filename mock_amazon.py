@@ -24,5 +24,5 @@ def test_send_world_id(ups_fd):
 
 if __name__ == "__main__":
     ups_fd = ups.build_client(UPS_HOST, UPS_PORT)
-    # test_send_world_id_resend(ups_fd)
-    test_send_world_id(ups_fd)
+    test_send_world_id_resend(ups_fd)
+    # test_send_world_id(ups_fd)

@@ -70,6 +70,15 @@ def handle_acks(msg, exp_seqs):
             exp_seqs.pop(ack)
     return
 
+def handle_resend(exp_seqs):
+    for seq in exp_seqs:
+        fd, msg, time_sent = exp_seqs[seq]
+        curr_time = time.time()
+        if curr_time - time_sent >= RETRY_INTERVAL:
+            send_msg(fd, msg)
+            exp_seqs[seq] = [fd, msg, curr_time]
+    return
+
 def run_service(world_fd, amazon_fd, seq, exp_seqs):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
@@ -78,12 +87,7 @@ def run_service(world_fd, amazon_fd, seq, exp_seqs):
             if not a_msg: # receive empty msg if amazon close connection
                 continue
             handle_acks(a_msg, exp_seqs)
-        for seq in exp_seqs:
-            fd, msg, time_sent = exp_seqs[seq]
-            curr_time = time.time()
-            if curr_time - time_sent >= RETRY_INTERVAL:
-                send_msg(fd, msg)
-                exp_seqs[seq] = [fd, msg, curr_time]
+        handle_resend(exp_seqs)
     return
 
 
