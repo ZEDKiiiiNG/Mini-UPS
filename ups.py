@@ -15,7 +15,6 @@ def send_msg(fd, msg):
     return
 
 def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
-    msg.seqnum = curr_seq[0]
     send_msg(fd, msg)
     exp_seqs[curr_seq[0]] = [fd, msg, time.time()]
     curr_seq[0] += 1
@@ -65,8 +64,8 @@ def connect_world(world_fd):
 
 def send_pickup(world_fd, curr_seq, exp_seqs, whid):
     u_msg = amazon_ups_pb2.UMsg()
-    u_msg.truckid = 2  # TODO truck_id = db.get_pickup_truck()
-    u_msg.whid = whid
+    # TODO truck_id = db.get_pickup_truck()
+    u_msg.deliveries.add(truckid=2, whid=whid, seqnum=curr_seq[0])
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -74,9 +73,7 @@ def send_pickup(world_fd, curr_seq, exp_seqs, whid):
 def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     u_msg = amazon_ups_pb2.UMsg()
     u_msg.worldid.add(worldid=world_id, seqnum=curr_seq[0])
-    send_msg(amazon_fd, u_msg)
-    exp_seqs[curr_seq[0]] = [amazon_fd, u_msg, time.time()]
-    curr_seq[0] += 1
+    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
 
 def handle_acks(msg, exp_seqs):
@@ -99,12 +96,12 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for truck_req in a_msg.truckreq:
         print(truck_req)
         seq = truck_req.seqnum
+        whid = truck_req.wh.id
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             # TODO db.save_package()
-            send_pickup(world_fd, curr_seq,)
-
+            send_pickup(world_fd, curr_seq, exp_seqs, whid)
     return
 
 def send_ack(fd, seq, msg_type):
@@ -121,7 +118,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             if not a_msg: # receive empty msg if amazon close connection
                 continue
             handle_acks(a_msg, exp_seqs)
-            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            # handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         handle_resend(exp_seqs)
     return
 
