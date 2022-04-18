@@ -83,6 +83,12 @@ def handle_resend(exp_seqs):
 def handle_truck_req(msg, curr_seq, exp_seqs, ack_seqs):
     return
 
+def send_ack(fd, seq, msg_type):
+    msg = msg_type()
+    msg.acks.append(seq)
+    send_msg(fd, msg)
+    return
+
 def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
