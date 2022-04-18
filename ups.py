@@ -18,17 +18,6 @@ def recv_msg(fd, msg_type):
     msg.ParseFromString(msg_str[1:])
     return msg
 
-def send_with_retry(fd, msg, msg_type, ack_seqs):
-    send_msg(fd, msg)
-    ready_fds = select.select([fd], [], [], RETRY_INTERVAL)
-    if fd in ready_fds:
-        msg = recv_msg(fd, msg_type)
-        for ack in msg.acks:
-            if ack == msg.seqnum:
-                ack_seqs.add(ack)
-                return
-    return send_with_retry(fd, msg, msg_type, ack_seqs)
-
 def build_server(host, port):
     fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     fd.bind((host, port))
@@ -56,23 +45,25 @@ def connect_world(world_fd):
     print("world id: {}".format(world_id))
     return world_id
 
-def send_world_id(amazon_fd, world_id, seq_num, ack_seqs):
+def send_world_id(amazon_fd, world_id, seq, exp_seqs):
     u_msg = amazon_ups_pb2.U2AWorldId()
     u_msg.worldid = world_id
-    u_msg.seqnum = seq_num
-    send_with_retry(amazon_fd, u_msg, amazon_ups_pb2.AMsg, ack_seqs)
+    u_msg.seqnum = seq
+    send_msg(amazon_fd, u_msg)
+    exp_seqs[seq] = [amazon_fd, u_msg, time.time()]
     return
 
 def main():
-    seq_num = 0
+    seq = 0
     ack_seqs = set()
+    exp_seqs = {}
 
     world_fd = build_client(WORLD_HOST, WORLD_PORT)
     world_id = connect_world(world_fd)
     listen_fd = build_server(UPS_HOST, UPS_PORT)
     amazon_fd, _ = listen_fd.accept()
-    send_world_id(amazon_fd, world_id, seq_num, ack_seqs)
-    seq_num += 1
+    send_world_id(amazon_fd, world_id, seq, exp_seqs)
+    seq += 1
     return
 
 if __name__ == "__main__":
