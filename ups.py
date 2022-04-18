@@ -62,10 +62,9 @@ def connect_world(world_fd):
     return world_id
 
 
-def send_pickup(world_fd, curr_seq, exp_seqs, whid):
-    u_msg = amazon_ups_pb2.UMsg()
-    # TODO truck_id = db.get_pickup_truck()
-    u_msg.deliveries.add(truckid=2, whid=whid, seqnum=curr_seq[0])
+def send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid):
+    u_msg = world_ups_pb2.UCommands()
+    u_msg.pickups.add(truckid=truck_id, whid=whid, seqnum=curr_seq[0])
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -75,6 +74,14 @@ def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     u_msg.worldid.add(worldid=world_id, seqnum=curr_seq[0])
     send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
+
+
+def send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id):
+    u_msg = amazon_ups_pb2.UMsg()
+    u_msg.trucksent.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
+    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
+    return
+
 
 def handle_acks(msg, exp_seqs):
     for ack in msg.acks:
@@ -94,17 +101,21 @@ def handle_resend(exp_seqs):
 
 def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for truck_req in a_msg.truckreq:
-        print(truck_req)
-        seq = truck_req.seqnum
         whid = truck_req.wh.id
+        package_id = truck_req.packageid
+        seq = truck_req.seqnum
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             # TODO db.save_package()
-            send_pickup(world_fd, curr_seq, exp_seqs, whid)
+            # TODO truck_id = db.get_pickup_truck()
+            truck_id = 2
+            send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
+            send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
 def send_ack(fd, seq, msg_type):
+    print("seq: {}".format(seq))
     msg = msg_type()
     msg.acks.append(seq)
     send_msg(fd, msg)
@@ -118,12 +129,13 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             if not a_msg: # receive empty msg if amazon close connection
                 continue
             handle_acks(a_msg, exp_seqs)
-            # handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         handle_resend(exp_seqs)
     return
 
 
 def main():
+    print("ups running..")
     curr_seq = [0]
     ack_seqs = set()
     exp_seqs = {}
