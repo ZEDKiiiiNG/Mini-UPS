@@ -1,6 +1,7 @@
 import socket
 import world_ups_pb2
 from google.protobuf.internal.encoder import _EncodeVarint
+from google.protobuf.internal.decoder import _DecodeVarint32
 from constant import *
 import amazon_ups_pb2
 import time
@@ -15,10 +16,10 @@ def send_msg(fd, msg):
 
 
 def recv_msg(fd, msg_type):
-    msg_str = fd.recv(MSG_LEN)
-    print(msg_str)
+    msg_len, _ = _DecodeVarint32(fd.recv(1), 0)
     msg = msg_type()
-    msg.ParseFromString(msg_str[1:])
+    msg_str = fd.recv(msg_len)
+    msg.ParseFromString(msg_str)
     return msg
 
 
@@ -70,11 +71,10 @@ def handle_service(world_fd, amazon_fd, seq, exp_seqs):
                     exp_seqs.pop(ack)
         for seq in exp_seqs:
             fd, msg, time_sent = exp_seqs[seq]
-            if time.time() - time_sent >= RETRY_INTERVAL:
-                print(msg)
+            curr_time = time.time()
+            if curr_time - time_sent >= RETRY_INTERVAL:
                 send_msg(fd, msg)
-                exp_seqs[seq] = [fd, msg, time.time()]
-                # exp_seqs.pop(seq)
+                exp_seqs[seq] = [fd, msg, curr_time]
     return
 
 
