@@ -57,7 +57,7 @@ def recv_ack(ups_fd):
     return
 
 def recv_msg(fd, msg_type):
-    time.sleep(1)
+    time.sleep(2)
     buffer = []
     pos = 0
     while True:
@@ -73,7 +73,7 @@ def recv_msg(fd, msg_type):
 def main():
     ups_fd = build_client(UPS_HOST, UPS_PORT)
     # test_resend(ups_fd)
-    #test_send_world_id(ups_fd)
+    test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
     test_deliver_req(ups_fd)
     while True:
