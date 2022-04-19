@@ -22,30 +22,14 @@ def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
     curr_seq[0] += 1
     return
 
-
-# def recv_msg(fd, msg_type):
-#     temp = fd.recv(1)
-#     if not temp:
-#         return temp
-#     print(temp)
-#     msg_len, pos = _DecodeVarint32(temp, 0)
-#     print(pos)
-#     msg = msg_type()
-#     msg_str = fd.recv(msg_len)
-#     msg.ParseFromString(msg_str)
-#     return msg
-
 def recv_msg(fd, msg_type):
     buffer = []
     pos = 0
-    cnt = 0
     while True:
         buffer += fd.recv(1)
-        print("{}: {}".format(cnt, buffer))
         msg_len, pos = _DecodeVarint32(buffer, pos)
         if pos != 0:
             break
-        cnt += 1
     msg = msg_type()
     msg_str = fd.recv(msg_len)
     msg.ParseFromString(msg_str)
@@ -87,7 +71,7 @@ def connect_world(world_fd):
         u_msg.trucks.add(id=i, x=i, y=i)
     send_msg(world_fd, u_msg)
     # ups receive UConnected from world
-    w_msg = recv_msg(world_fd, world_ups_pb2.UConnected)
+    w_msg = recv_stream_msg(world_fd, world_ups_pb2.UConnected)[0]
     world_id = w_msg.worldid
     result = w_msg.result
     if result != CONNECTED:
@@ -205,16 +189,15 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
-            a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
-            if not a_msg:  # amazon close connection
-                break
-            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-            handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-            handle_acks(a_msg, exp_seqs)
-            # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
+            a_msgs = recv_stream_msg(amazon_fd, amazon_ups_pb2.AMsg)
+            for a_msg in a_msgs:
+                handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+                handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+                handle_acks(a_msg, exp_seqs)
+                # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
-            stream_msg = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
-            for w_msg in stream_msg:
+            w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
+            for w_msg in w_msgs:
                 handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
         handle_resend(exp_seqs)
     return

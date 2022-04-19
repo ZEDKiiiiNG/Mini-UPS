@@ -2,6 +2,7 @@ from constant import *
 from ups import *
 import amazon_ups_pb2
 import time
+from google.protobuf.internal.decoder import _DecodeVarint32
 
 
 def test_resend(ups_fd):
