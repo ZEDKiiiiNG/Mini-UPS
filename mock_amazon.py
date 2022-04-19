@@ -12,12 +12,14 @@ def test_resend(ups_fd):
         print(u_msg)
     return
 
+
 def test_send_world_id(ups_fd):
     u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
     for w in u_msg.worldid:
         seq = w.seqnum
         send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
     return
+
 
 def test_truck_req(ups_fd):
     # amazon send truck_req and recv ack to ups
