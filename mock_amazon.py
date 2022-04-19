@@ -64,7 +64,8 @@ def main():
     test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
     test_deliver_req(ups_fd)
-    time.sleep(10)
+    while True:
+        pass
     return
 
 

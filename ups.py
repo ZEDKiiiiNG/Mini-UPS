@@ -38,12 +38,13 @@ def recv_msg(fd, msg_type):
     buffer = []
     while True:
         buffer += fd.recv(1)
+        print(buffer)
         msg_len, pos = _DecodeVarint32(buffer, 0)
-        print("pos: {}".format(pos))
         if pos != 0:
             break
     msg = msg_type()
     msg_str = fd.recv(msg_len)
+    print(msg_str)
     msg.ParseFromString(msg_str)
     return msg
 
@@ -89,7 +90,8 @@ def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, des
     u_msg = world_ups_pb2.UCommands()
     deliver = u_msg.deliveries.add(truckid=truck_id, seqnum=curr_seq[0])
     deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
-    print(deliver)
+    print("~~~~~~~~~")
+    print(u_msg)
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -165,7 +167,7 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             # TODO update dest to amazon if address changed
             # TODO db.updatePackageStatus "out_for_delivery"
             # TODO db.updateTruckStatus "delivering"
-            # send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
+            send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
 
@@ -195,8 +197,10 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_acks(a_msg, exp_seqs)
             # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
-        if world_fd in ready_fds:
+        cnt = 0
+        if world_fd in ready_fds and cnt == 0:
             w_msg = recv_msg(world_fd, world_ups_pb2.UResponses)
+            cnt += 1
             print(w_msg)
             if not w_msg:
                 break
