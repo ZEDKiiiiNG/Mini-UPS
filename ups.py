@@ -14,6 +14,7 @@ def send_msg(fd, msg):
     fd.sendall(msg_str)
     return
 
+
 def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
     send_msg(fd, msg)
     exp_seqs[curr_seq[0]] = [fd, msg, time.time()]
@@ -69,6 +70,14 @@ def send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid):
     return
 
 
+def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y):
+    u_msg = world_ups_pb2.UCommands()
+    deliver = u_msg.deliveries.add(truckid=truck_id, seqnum=curr_seq[0])
+    deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
+    send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
+    return
+
+
 def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     u_msg = amazon_ups_pb2.UMsg()
     u_msg.worldid.add(worldid=world_id, seqnum=curr_seq[0])
@@ -90,14 +99,17 @@ def handle_acks(msg, exp_seqs):
             exp_seqs.pop(ack)
     return
 
+
 def handle_resend(exp_seqs):
     for seq in exp_seqs:
         fd, msg, time_sent = exp_seqs[seq]
         curr_time = time.time()
         if curr_time - time_sent >= RETRY_INTERVAL:
+            print("resend msg: {}".format(seq))
             send_msg(fd, msg)
             exp_seqs[seq] = [fd, msg, curr_time]
     return
+
 
 def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for truck_req in a_msg.truckreq:
@@ -114,6 +126,7 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
+
 def send_ack(fd, seq, msg_type):
     print("seq: {}".format(seq))
     msg = msg_type()
@@ -121,15 +134,30 @@ def send_ack(fd, seq, msg_type):
     send_msg(fd, msg)
     return
 
+
+def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
+    for deliver_req in a_msg.deliverreq:
+        package_id = deliver_req.packageid
+        truck_id = deliver_req.truckid
+        dest_x = deliver_req.dest_x
+        dest_y = deliver_req.dest_y
+        seq = deliver_req.seqnum
+        print("{},{},{},{},{}", package_id, truck_id, dest_x, dest_y, seq)
+        # TODO db.getDest()
+        # send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
+    return
+
+
 def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
-            if not a_msg: # receive empty msg if amazon close connection
+            if not a_msg:  # receive empty msg if amazon close connection
                 continue
             handle_acks(a_msg, exp_seqs)
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            # handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         handle_resend(exp_seqs)
     return
 

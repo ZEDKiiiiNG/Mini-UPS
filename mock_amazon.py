@@ -45,8 +45,22 @@ def test_truck_req(ups_fd):
     return
 
 
-if __name__ == "__main__":
+def test_deliver_req(ups_fd):
+    a_msg = amazon_ups_pb2.AMsg()
+    a_msg.deliverreq.add(packageid=2, truckid=2, dest_x=5, dest_y=8, seqnum=21)
+    send_msg(ups_fd, a_msg)
+    return
+
+
+def main():
     ups_fd = build_client(UPS_HOST, UPS_PORT)
     # test_resend(ups_fd)
     test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
+    # test_deliver_req(ups_fd)
+    time.sleep(10)
+    return
+
+
+if __name__ == "__main__":
+    main()
