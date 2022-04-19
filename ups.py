@@ -89,6 +89,7 @@ def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, des
     u_msg = world_ups_pb2.UCommands()
     deliver = u_msg.deliveries.add(truckid=truck_id, seqnum=curr_seq[0])
     deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
+    print(deliver)
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -128,10 +129,10 @@ def handle_resend(exp_seqs):
 
 def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for truck_req in a_msg.truckreq:
-        whid = truck_req.wh.id
-        package_id = truck_req.packageid
         seq = truck_req.seqnum
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
+        whid = truck_req.wh.id
+        package_id = truck_req.packageid
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             # TODO db.savePackage(), package_status = "truck en route to warehouse"
@@ -152,17 +153,19 @@ def send_ack(fd, seq, msg_type):
 
 def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for deliver_req in a_msg.deliverreq:
+        seq = deliver_req.seqnum
+        send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
         package_id = deliver_req.packageid
         truck_id = deliver_req.truckid
         dest_x = deliver_req.dest_x
         dest_y = deliver_req.dest_y
-        seq = deliver_req.seqnum
-        # TODO db.getDest()
-        # TODO update dest to amazon if address changed
-        # TODO db.updatePackageStatus "out_for_delivery"
-        # TODO db.updateTruckStatus "delivering"
-        send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
-        send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
+        if seq not in ack_seqs:
+            ack_seqs.add(seq)
+            # TODO db.getDest()
+            # TODO update dest to amazon if address changed
+            # TODO db.updatePackageStatus "out_for_delivery"
+            # TODO db.updateTruckStatus "delivering"
+            # send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
 
@@ -173,9 +176,10 @@ def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
         seq = error.seqnum
         send_ack(fd, seq, msg_type)
         if seq not in ack_seqs:
-            exp_seqs.pop(seq)
+            exp_seqs.pop(origin_seq)
             ack_seqs.add(seq)
-            print("origin seq: {} error message: {}", origin_seq, err_msg)
+            print("origin seq: {}".format(origin_seq))
+            print("{}".format(err_msg))
 
     return
 
@@ -188,15 +192,15 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             if not a_msg:  # amazon close connection
                 break
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-            # handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_acks(a_msg, exp_seqs)
             # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msg = recv_msg(world_fd, world_ups_pb2.UResponses)
             print(w_msg)
-        #     if not w_msg:
-        #         break
-            # handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
+            if not w_msg:
+                break
+            handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
         handle_resend(exp_seqs)
     return
 
