@@ -9,6 +9,7 @@ import select
  
 
 def send_msg(fd, msg):
+    time.sleep(2)
     msg_str = msg.SerializeToString()
     _EncodeVarint(fd.sendall, len(msg_str), None)
     fd.sendall(msg_str)
@@ -38,13 +39,11 @@ def recv_msg(fd, msg_type):
     buffer = []
     while True:
         buffer += fd.recv(1)
-        print(buffer)
         msg_len, pos = _DecodeVarint32(buffer, 0)
         if pos != 0:
             break
     msg = msg_type()
     msg_str = fd.recv(msg_len)
-    print(msg_str)
     msg.ParseFromString(msg_str)
     return msg
 
@@ -90,8 +89,6 @@ def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, des
     u_msg = world_ups_pb2.UCommands()
     deliver = u_msg.deliveries.add(truckid=truck_id, seqnum=curr_seq[0])
     deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
-    print("~~~~~~~~~")
-    print(u_msg)
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -197,11 +194,8 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_acks(a_msg, exp_seqs)
             # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
-        cnt = 0
-        if world_fd in ready_fds and cnt == 0:
+        if world_fd in ready_fds:
             w_msg = recv_msg(world_fd, world_ups_pb2.UResponses)
-            cnt += 1
-            print(w_msg)
             if not w_msg:
                 break
             handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
