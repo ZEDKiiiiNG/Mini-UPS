@@ -57,6 +57,7 @@ def recv_ack(ups_fd):
     return
 
 def recv_msg(fd, msg_type):
+    time.sleep(1)
     buffer = []
     pos = 0
     while True:
