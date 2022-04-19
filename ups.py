@@ -9,7 +9,7 @@ import select
  
 
 def send_msg(fd, msg):
-    time.sleep(2)
+    # time.sleep(2)
     msg_str = msg.SerializeToString()
     _EncodeVarint(fd.sendall, len(msg_str), None)
     fd.sendall(msg_str)
@@ -37,15 +37,33 @@ def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
 
 def recv_msg(fd, msg_type):
     buffer = []
+    pos = 0
+    cnt = 0
     while True:
         buffer += fd.recv(1)
-        msg_len, pos = _DecodeVarint32(buffer, 0)
+        print("{}: {}".format(cnt, buffer))
+        msg_len, pos = _DecodeVarint32(buffer, pos)
         if pos != 0:
             break
+        cnt += 1
     msg = msg_type()
     msg_str = fd.recv(msg_len)
     msg.ParseFromString(msg_str)
     return msg
+
+def recv_msg_2(fd, msg_type):
+    buf = fd.recv(MSG_LEN)
+    ans = []
+    n = 0
+    while n < len(buf):
+        msg_len, new_pos = _DecodeVarint32(buf, n)
+        n = new_pos
+        msg_buf = buf[n:n+msg_len]
+        n += msg_len
+        msg = msg_type()
+        msg.ParseFromString(msg_buf)
+        print(msg)
+    return
 
 
 def build_server(host, port):
@@ -195,10 +213,10 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_acks(a_msg, exp_seqs)
             # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
-            w_msg = recv_msg(world_fd, world_ups_pb2.UResponses)
-            if not w_msg:
-                break
-            handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
+            recv_msg_2(world_fd, world_ups_pb2.UResponses)
+            # if not w_msg:
+            #     break
+            # handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
         handle_resend(exp_seqs)
     return
 
