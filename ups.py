@@ -51,20 +51,18 @@ def recv_msg(fd, msg_type):
     msg.ParseFromString(msg_str)
     return msg
 
-def recv_msg_2(fd, msg_type):
+def recv_stream_msg(fd, msg_type):
     buf = fd.recv(MSG_LEN)
     ans = []
     n = 0
     while n < len(buf):
         msg_len, new_pos = _DecodeVarint32(buf, n)
-        print("new_pos: {}".format(new_pos))
         n = new_pos
         msg_buf = buf[n:n+msg_len]
         n += msg_len
         msg = msg_type()
         msg.ParseFromString(msg_buf)
         ans.append(msg)
-        print(msg)
     return ans
 
 
@@ -159,8 +157,6 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             truck_id = 2
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
-            send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
-            send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
 
@@ -217,10 +213,9 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_acks(a_msg, exp_seqs)
             # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
-            recv_msg_2(world_fd, world_ups_pb2.UResponses)
-            # if not w_msg:
-            #     break
-            # handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
+            stream_msg = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
+            for w_msg in stream_msg:
+                handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
         handle_resend(exp_seqs)
     return
 

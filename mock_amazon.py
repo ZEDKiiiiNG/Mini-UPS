@@ -31,14 +31,14 @@ def test_truck_req(ups_fd):
     truck_req.wh.y = 8
     truck_req.things.add(id=4, description="banana", count=5)
     send_msg(ups_fd, a_msg)
-    # recv_ack(ups_fd)
-    #
-    # # amazon recv truck_sent and send ack to ups
-    # u_msg2 = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
-    # print(u_msg2)
-    # for truck_sent in u_msg2.trucksent:
-    #     seq = truck_sent.seqnum
-    #     send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
+    recv_ack(ups_fd)
+
+    # amazon recv truck_sent and send ack to ups
+    u_msg2 = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
+    print(u_msg2)
+    for truck_sent in u_msg2.trucksent:
+        seq = truck_sent.seqnum
+        send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
     return
 
 
@@ -61,7 +61,7 @@ def recv_ack(ups_fd):
 def main():
     ups_fd = build_client(UPS_HOST, UPS_PORT)
     # test_resend(ups_fd)
-    # test_send_world_id(ups_fd)
+    test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
     test_deliver_req(ups_fd)
     while True:
