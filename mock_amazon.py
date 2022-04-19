@@ -63,7 +63,7 @@ def main():
     # test_resend(ups_fd)
     test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
-    test_deliver_req(ups_fd)
+    # test_deliver_req(ups_fd)
     while True:
         pass
     return
