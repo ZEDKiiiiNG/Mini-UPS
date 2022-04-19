@@ -22,18 +22,6 @@ def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
     curr_seq[0] += 1
     return
 
-def recv_msg(fd, msg_type):
-    buffer = []
-    pos = 0
-    while True:
-        buffer += fd.recv(1)
-        msg_len, pos = _DecodeVarint32(buffer, pos)
-        if pos != 0:
-            break
-    msg = msg_type()
-    msg_str = fd.recv(msg_len)
-    msg.ParseFromString(msg_str)
-    return msg
 
 def recv_stream_msg(fd, msg_type):
     buf = fd.recv(MSG_LEN)
@@ -166,6 +154,7 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             # TODO update dest to amazon if address changed
             # TODO db.updatePackageStatus "out_for_delivery"
             # TODO db.updateTruckStatus "delivering"
+            send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 

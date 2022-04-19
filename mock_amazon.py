@@ -4,7 +4,6 @@ import amazon_ups_pb2
 import time
 from google.protobuf.internal.decoder import _DecodeVarint32
 
-
 def test_resend(ups_fd):
     count = 10
     for i in range(count):
@@ -58,6 +57,18 @@ def recv_ack(ups_fd):
         print("ack: {}".format(ack))
     return
 
+def recv_msg(fd, msg_type):
+    buffer = []
+    pos = 0
+    while True:
+        buffer += fd.recv(1)
+        msg_len, pos = _DecodeVarint32(buffer, pos)
+        if pos != 0:
+            break
+    msg = msg_type()
+    msg_str = fd.recv(msg_len)
+    msg.ParseFromString(msg_str)
+    return msg
 
 def main():
     ups_fd = build_client(UPS_HOST, UPS_PORT)
