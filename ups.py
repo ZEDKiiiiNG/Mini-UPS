@@ -2,7 +2,7 @@ import socket
 import world_ups_pb2
 from google.protobuf.internal.encoder import _EncodeVarint
 
-HOST = "vcm-24846.vm.duke.edu"
+HOST = "vcm-24667.vm.duke.edu"
 PORT = 23456
 MSG_LEN = 1024
 

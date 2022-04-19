@@ -1,0 +1,107 @@
+{#login/templates/login/index.html#}
+
+{% extends 'login/base.html' %}
+{% block title %}Home page{% endblock %}
+{% block content %}
+<h2><div style="width:100%;text-align:center"> Search Shipment
+        </div></h2>
+    <div style="width:100%;text-align:center">
+          <form method="POST" class="form-group" >
+        {% csrf_token %}
+       {{serachForm.as_p}}
+        <button type="submit" class="btn btn-primary" name="Search">Search</button>
+      </form>
+    </div>
+    {% if message %}
+        <div class="alert alert-warning">{{ message }}</div>
+    {% endif %}
+        <table class="table table-bordered table-hover">
+
+        <thead>
+
+{#          <th><div style="width:100%;text-align:center"></div></th>#}
+          <th><div style="width:100%;text-align:center"> Package Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse location</div></th>
+          <th><div style="width:100%;text-align:center"> Destination location </div></th>
+          <th><div style="width:100%;text-align:center"> Truck  </div></th>
+          <th><div style="width:100%;text-align:center"> Package Status </div></th>
+      <th></th>
+          </tr>
+        </thead>
+        <tbody>
+    {% for package_item in searchList %}
+   <tr>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whX}}, {{package_item.whY}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.destX}}, {{package_item.destY}}</div></td>
+          <td><div style="width:100%;text-align:center"> ID: {{package_item.truck.truckId}}, Status: {{package_item.truck.truckStatus}} </div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgStatus}} </div></td>
+
+    </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% if request.session.is_login %}
+<div class="container-fluid">
+<div style="width:100%;text-align:center" >
+    <h1>Hello,{{ request.session.user_name }}！Welcome back！！</h1>
+    <form method="GET"> <div style="width:100%;text-align:center" >
+      <button type="submit" class="btn btn-primary" name="Passenger">Passenger</button>
+      <button type="submit" class="btn btn-primary" name="Driver">Driver</button>
+    </div>
+    </form>
+</div>
+</div>
+<h2><div style="width:100%;text-align:center"> Your own shipment
+        </div></h2>
+
+        <table class="table table-bordered table-hover">
+
+        <thead>
+
+{#          <th><div style="width:100%;text-align:center"></div></th>#}
+          <th><div style="width:100%;text-align:center"> Package Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse location</div></th>
+          <th><div style="width:100%;text-align:center"> Destination location </div></th>
+          <th><div style="width:100%;text-align:center"> Truck  </div></th>
+          <th><div style="width:100%;text-align:center"> Package Status </div></th>
+          <th><div style="width:100%;text-align:center"> Operation </div></th>
+      <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+  {% for package_item in pkgs_list %}
+   <tr>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whX}}, {{package_item.whY}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.destX}}, {{package_item.destY}}</div></td>
+          <td><div style="width:100%;text-align:center"> ID: {{package_item.truck.truckId}}, Status: {{package_item.truck.truckStatus}} </div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgStatus}} </div></td>
+        {% if package_item.pkgStatus != 'out for delivery' %}
+      <td><div style="width:100%;text-align:center">
+          <form method="POST" class="form-group" >
+        {% csrf_token %}
+       {{change_form.as_p}}
+        <button type="submit" class="btn btn-primary" name="Change" value= {{ package_item.pkgId }}>Change destination</button>
+      </form>
+      </div>
+    </td>
+        {% else %}
+        <td><div style="width:100%;text-align:center">Pacakge is out for delivery </div></td>
+        {% endif %}
+
+    </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+
+    {% else %}
+    <h1>Please Log in to view your own shipment！</h1>
+    {% endif %}
+{% endblock %}
