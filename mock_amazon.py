@@ -64,7 +64,6 @@ def recv_ack(ups_fd):
 # only for test
 def recv_msg(fd, msg_type):
     buffer = []
-    pos = 0
     while True:
         buffer += fd.recv(1)
         msg_len, pos = _DecodeVarint32(buffer, 0)
