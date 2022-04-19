@@ -57,13 +57,15 @@ def recv_msg_2(fd, msg_type):
     n = 0
     while n < len(buf):
         msg_len, new_pos = _DecodeVarint32(buf, n)
+        print("new_pos: {}".format(new_pos))
         n = new_pos
         msg_buf = buf[n:n+msg_len]
         n += msg_len
         msg = msg_type()
         msg.ParseFromString(msg_buf)
+        ans.append(msg)
         print(msg)
-    return
+    return ans
 
 
 def build_server(host, port):
@@ -156,6 +158,8 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             # TODO truck_id = db.getPickupTruck(), truck_status = "traveling"
             truck_id = 2
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
+            send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
+            send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
