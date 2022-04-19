@@ -7,14 +7,14 @@ from google.protobuf.internal.decoder import _DecodeVarint32
 def test_resend(ups_fd):
     count = 10
     for i in range(count):
-        u_msg = recv_stream_msg(ups_fd, amazon_ups_pb2.UMsg)[0]
+        u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
         print(i)
         print(u_msg)
     return
 
 
 def test_send_world_id(ups_fd):
-    u_msg = recv_stream_msg(ups_fd, amazon_ups_pb2.UMsg)[0]
+    u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
     for w in u_msg.worldid:
         seq = w.seqnum
         send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
@@ -56,7 +56,7 @@ def send_msg_sleep(fd, msg):
     return
 
 def recv_ack(ups_fd):
-    u_msg = recv_stream_msg(ups_fd, amazon_ups_pb2.UMsg)[0]
+    u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
     for ack in u_msg.acks:
         print("ack: {}".format(ack))
     return
@@ -67,7 +67,7 @@ def recv_msg(fd, msg_type):
     pos = 0
     while True:
         buffer += fd.recv(1)
-        msg_len, pos = _DecodeVarint32(buffer, pos)
+        msg_len, pos = _DecodeVarint32(buffer, 0)
         if pos != 0:
             break
     msg = msg_type()
