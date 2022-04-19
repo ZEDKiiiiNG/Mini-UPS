@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 message Exception{
-    required string info = 1;
+    required string err = 1;
     required int32 originseqnum = 2;
     required int32 seqnum = 3;
 }
@@ -60,7 +60,7 @@ message AMsg {
     repeated ATruckReq truckreq = 1;
     repeated ADeliverReq deliverreq = 2;
     repeated int32 acks = 3;
-    repeated Exception err = 4;
+    repeated Exception error = 4;
 }
 
 message UMsg {
@@ -69,5 +69,5 @@ message UMsg {
     repeated UTruckArrived truckarrived = 3;
     repeated U2AWorldId worldid = 4;
     repeated int32 acks = 5;
-    repeated Exception err = 6;
+    repeated Exception error = 6;
 }
