@@ -9,7 +9,6 @@ import select
  
 
 def send_msg(fd, msg):
-    # time.sleep(2)
     msg_str = msg.SerializeToString()
     _EncodeVarint(fd.sendall, len(msg_str), None)
     fd.sendall(msg_str)
@@ -128,7 +127,6 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             # TODO truck_id = db.getPickupTruck(), truck_status = "traveling"
             truck_id = 2
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
-            send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
 
@@ -154,7 +152,6 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             # TODO update dest to amazon if address changed
             # TODO db.updatePackageStatus "out_for_delivery"
             # TODO db.updateTruckStatus "delivering"
-            send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
@@ -187,7 +184,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
-                handle_error(world_fd, exp_seqs, ack_seqs, w_msg, amazon_ups_pb2.UMsg)
+                handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UResponses)
         handle_resend(exp_seqs)
     return
 

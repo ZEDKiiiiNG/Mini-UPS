@@ -35,7 +35,6 @@ def test_truck_req(ups_fd):
 
     # amazon recv truck_sent and send ack to ups
     u_msg2 = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
-    print(u_msg2)
     for truck_sent in u_msg2.trucksent:
         seq = truck_sent.seqnum
         send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
@@ -73,7 +72,7 @@ def recv_msg(fd, msg_type):
 def main():
     ups_fd = build_client(UPS_HOST, UPS_PORT)
     # test_resend(ups_fd)
-    test_send_world_id(ups_fd)
+    #test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
     test_deliver_req(ups_fd)
     while True:
