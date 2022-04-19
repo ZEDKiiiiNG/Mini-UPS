@@ -22,7 +22,7 @@ def test_send_world_id(ups_fd):
 
 
 def test_truck_req(ups_fd):
-    # amazon send truck_req and recv ack to ups
+    # amazon send truck_req and recv ack from ups
     a_msg = amazon_ups_pb2.AMsg()
     truck_req = a_msg.truckreq.add(upsaccount="test_user", packageid=2, seqnum=20)
     # only have add() for repeated field
@@ -31,10 +31,7 @@ def test_truck_req(ups_fd):
     truck_req.wh.y = 8
     truck_req.things.add(id=4, description="banana", count=5)
     send_msg(ups_fd, a_msg)
-
-    u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
-    for ack in u_msg.acks:
-        print("ack: {}".format(ack))
+    recv_ack(ups_fd)
 
     # amazon recv truck_sent and send ack to ups
     u_msg2 = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
@@ -46,9 +43,18 @@ def test_truck_req(ups_fd):
 
 
 def test_deliver_req(ups_fd):
+    # amazon send deliver_req and recv ack from ups
     a_msg = amazon_ups_pb2.AMsg()
     a_msg.deliverreq.add(packageid=2, truckid=2, dest_x=5, dest_y=8, seqnum=21)
     send_msg(ups_fd, a_msg)
+    recv_ack(ups_fd)
+    return
+
+
+def recv_ack(ups_fd):
+    u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
+    for ack in u_msg.acks:
+        print("ack: {}".format(ack))
     return
 
 
@@ -57,8 +63,9 @@ def main():
     # test_resend(ups_fd)
     test_send_world_id(ups_fd)
     test_truck_req(ups_fd)
-    # test_deliver_req(ups_fd)
-    time.sleep(10)
+    test_deliver_req(ups_fd)
+    while True:
+        pass
     return
 
 

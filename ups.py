@@ -119,8 +119,8 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
-            # TODO db.save_package()
-            # TODO truck_id = db.get_pickup_truck()
+            # TODO db.savePackage(), package_status = "truck en route to warehouse"
+            # TODO truck_id = db.getPickupTruck(), truck_status = "traveling"
             truck_id = 2
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
@@ -142,9 +142,12 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         dest_x = deliver_req.dest_x
         dest_y = deliver_req.dest_y
         seq = deliver_req.seqnum
-        print("{},{},{},{},{}", package_id, truck_id, dest_x, dest_y, seq)
         # TODO db.getDest()
-        # send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
+        # TODO update dest to amazon if address changed
+        # TODO db.updatePackageStatus "out_for_delivery"
+        # TODO db.updateTruckStatus "delivering"
+        send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
+        send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
 
@@ -153,11 +156,11 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
-            if not a_msg:  # receive empty msg if amazon close connection
-                continue
+            if not a_msg:  # amazon close connection
+                break
             handle_acks(a_msg, exp_seqs)
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-            # handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         handle_resend(exp_seqs)
     return
 
