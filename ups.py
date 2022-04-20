@@ -188,11 +188,10 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
-            a_msgs = recv_stream_msg(amazon_fd, amazon_ups_pb2.AMsg)
-            for a_msg in a_msgs:
-                handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-                handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-                handle_acks(a_msg, exp_seqs)
+            a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
+            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            handle_acks(a_msg, exp_seqs)
             # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
