@@ -68,6 +68,7 @@ def connect_world(world_fd):
     u_msg.isAmazon = False
     for i in range(TRUCK_NUM):
         u_msg.trucks.add(id=i, x=i, y=i)
+        # TODO db.createTruck status = IDLE
     send_msg(world_fd, u_msg)
     # ups receive UConnected from world
     w_msg = recv_msg(world_fd, world_ups_pb2.UConnected)
