@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="SshConfigs">
-    <configs>
-      <sshConfig authType="PASSWORD" host="vcm-24846.vm.duke.edu" id="4d94fde6-65f0-4087-94de-4a1ec91e3cc4" port="22" nameFormat="DESCRIPTIVE" username="ts325" useOpenSSHConfig="true" />
-    </configs>
-  </component>
-</project>
