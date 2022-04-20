@@ -6,5 +6,16 @@ UPS_PORT = 34567
 TRUCK_NUM = 8
 RETRY_INTERVAL = 5  # sec
 CONNECTED = "connected!"
-TRAVELING = "TRAVELING"
+
+# truck status
+IDLE = "idle"
+TRAVELING = "traveling"
+ARRIVE_WAREHOUSE = "arrive warehouse"
+LOADING = "loading"
+DELIVERING = "delivering"
+
+# package status
+CREATED = "created"
 TRUCK_EN_ROUTE_TO_WAREHOUSE = "truck en route to warehouse"
+TRUCK_WAITING_FOR_PACKAGE = "truck waiting for package"
+OUT_FOR_DELIVERY = "out for delivery"
