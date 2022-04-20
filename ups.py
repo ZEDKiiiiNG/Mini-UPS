@@ -198,7 +198,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             w_msg = recv_msg(world_fd, world_ups_pb2.UResponses)
             if not w_msg:
                 break
-            handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UResponses)
+            handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UCommands)
         handle_resend(exp_seqs)
     return
 
