@@ -131,13 +131,18 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for truck_req in a_msg.truckreq:
         seq = truck_req.seqnum
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
-        whid = truck_req.wh.id
-        package_id = truck_req.packageid
         if seq not in ack_seqs:
             ack_seqs.add(seq)
+            truck_id = 2 # TODO truck_id = db.getPickupTruck()
+            whid = truck_req.wh.id
+            whx = truck_req.wh.x
+            why = truck_req.wh.y
+            user_acc = truck_req.upsaccount
+            package_id = truck_req.packageid
+            package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
+            print("{}, {}, {}, {}, {}, {}, {}".format(truck_id, whid, whx, why, user_acc, package_id, package_status))
             # TODO db.savePackage(), package_status = "truck en route to warehouse"
-            # TODO truck_id = db.getPickupTruck(), truck_status = "traveling"
-            truck_id = 2
+            # TODO update truck_status to traveling
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
