@@ -168,6 +168,20 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
+def handle_completion(world_fd, ack_seqs, w_msg):
+    for completion in w_msg.completions:
+        seq = completion.seqnum
+        send_ack(world_fd, seq, world_ups_pb2.UResponses)
+        if seq not in ack_seqs:
+            ack_seqs.add(seq)
+            truck_id = completion.truckid
+            x = completion.x
+            y = completion.y
+            status = completion.status
+            # TODO db.updateTruckStatus "idle" or "arrive warehouse"
+            # TODO if truck "arrive warehouse" update package_status to "truck waiting to for package"
+    return
+
 
 def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
     for error in msg.error:
@@ -196,6 +210,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
+                handle_completion(world_fd, ack_seqs, w_msg)
                 handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UCommands)
         handle_resend(exp_seqs)
     return
