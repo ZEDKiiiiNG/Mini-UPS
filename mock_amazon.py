@@ -62,17 +62,28 @@ def recv_ack(ups_fd):
     return
 
 # only for test
+# def recv_msg(fd, msg_type):
+#     buffer = []
+#     while True:
+#         buffer += fd.recv(1)
+#         msg_len, pos = _DecodeVarint32(buffer, 0)
+#         if pos != 0:
+#             break
+#     msg = msg_type()
+#     msg_str = fd.recv(msg_len)
+#     msg.ParseFromString(msg_str)
+#     return msg
+
 def recv_msg(fd, msg_type):
-    buffer = []
-    while True:
-        buffer += fd.recv(1)
-        msg_len, pos = _DecodeVarint32(buffer, 0)
-        if pos != 0:
-            break
+    temp = fd.recv(1)
+    if not temp:
+        return temp
+    msg_len, _ = _DecodeVarint32(temp, 0)
     msg = msg_type()
     msg_str = fd.recv(msg_len)
     msg.ParseFromString(msg_str)
     return msg
+
 
 def main():
     ups_fd = build_client(UPS_HOST, UPS_PORT)
