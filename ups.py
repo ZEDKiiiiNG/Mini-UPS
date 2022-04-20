@@ -136,13 +136,17 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             ack_seqs.add(seq)
             truck_id = 2 # TODO truck_id = db.getPickupTruck()
             whid = truck_req.wh.id
-            whx = truck_req.wh.x
-            why = truck_req.wh.y
-            user_acc = truck_req.upsaccount
             package_id = truck_req.packageid
-            package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
-            print("{}, {}, {}, {}, {}, {}, {}".format(truck_id, whid, whx, why, user_acc, package_id, package_status))
-            # TODO db.savePackage()
+            # whx = truck_req.wh.x
+            # why = truck_req.wh.y
+            # if truck_req.HASFIELD("upsaccout"):
+            #     user_acc = truck_req.upsaccount
+            # else:
+            #     user_acc = ""
+            # package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE  # only one package on truck
+            # parse and store the products
+            # print("{}, {}, {}, {}, {}, {}, {}".format(truck_id, whid, whx, why, user_acc, package_id, package_status))
+            # TODO db.save_package(truck_req, truck_id)
             # TODO update truck_status to TRAVELING
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
@@ -168,15 +172,14 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             # TODO db.getDest()
-            # TODO db.updatePackageStatus OUT_FOR_DELIVERY
-            # TODO db.updateTruckStatus DELIVERING
+            # TODO update package status to OUT_FOR_DELIVERY
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
-def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id):
+def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
     u_msg = amazon_ups_pb2.UMsg()
-    package_id = 2  # TODO db get package_id with truck_id
-    u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq)
+    for package_id in package_ids:
+        u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq)
     send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -193,8 +196,13 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             print("{}, {}, {}, {}".format(truck_id, x, y, status))
             # TODO db.updateTruckStatus with status
             if status == ARRIVE_WAREHOUSE:
-                # TODO update package_status to TRUCK_WAITING_FOR_PACKAGE
-                send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id)
+                # TODO for each package status = TRUCK_EN_ROUTE_TO_WAREHOUSE
+                #  db.updatePackageStatus to TRUCK_WAITING_FOR_PACKAGE, return package_id
+                package_id = 2
+                send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
+    return
+
+def send_deliver_resp():
     return
 
 def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
@@ -203,9 +211,9 @@ def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
         send_ack(world_fd, seq, world_ups_pb2.UResponses)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
-            u_msg = amazon_ups_pb2.UMsg()
-            u_msg.add()
-            send_msg_with_seq(amazon_fd, msg, curr_seq, exp_seqs)
+            # u_msg = amazon_ups_pb2.UMsg()
+            # u_msg.add()
+            # send_msg_with_seq(amazon_fd, msg, curr_seq, exp_seqs)
     return
 
 
@@ -220,7 +228,6 @@ def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
             ack_seqs.add(seq)
             print("origin seq: {}".format(origin_seq))
             print("{}".format(err_msg))
-
     return
 
 
