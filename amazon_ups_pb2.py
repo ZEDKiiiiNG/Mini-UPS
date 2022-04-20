@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x61mazon_ups.proto\">\n\tException\x12\x0b\n\x03\x65rr\x18\x01 \x02(\t\x12\x14\n\x0coriginseqnum\x18\x02 \x02(\x05\x12\x0e\n\x06seqnum\x18\x03 \x02(\x05\"-\n\tWarehouse\x12\n\n\x02id\x18\x01 \x02(\x05\x12\t\n\x01x\x18\x02 \x02(\x05\x12\t\n\x01y\x18\x03 \x02(\x05\"9\n\x07Product\x12\n\n\x02id\x18\x01 \x02(\x03\x12\x13\n\x0b\x64\x65scription\x18\x02 \x02(\t\x12\r\n\x05\x63ount\x18\x03 \x02(\x05\"t\n\tATruckReq\x12\x16\n\x02wh\x18\x01 \x02(\x0b\x32\n.Warehouse\x12\x12\n\nupsaccount\x18\x02 \x01(\t\x12\x11\n\tpackageid\x18\x03 \x02(\x03\x12\x18\n\x06things\x18\x04 \x03(\x0b\x32\x08.Product\x12\x0e\n\x06seqnum\x18\x05 \x02(\x05\"a\n\x0b\x41\x44\x65liverReq\x12\x11\n\tpackageid\x18\x01 \x02(\x03\x12\x0f\n\x07truckid\x18\x02 \x02(\x05\x12\x0e\n\x06\x64\x65st_x\x18\x03 \x02(\x05\x12\x0e\n\x06\x64\x65st_y\x18\x04 \x02(\x05\x12\x0e\n\x06seqnum\x18\x05 \x02(\x05\"+\n\x08\x41Loading\x12\x0f\n\x07truckid\x18\x01 \x02(\x05\x12\x0e\n\x06seqnum\x18\x02 \x02(\x05\"0\n\x0bUDeliverRsp\x12\x11\n\tpackageid\x18\x01 \x02(\x03\x12\x0e\n\x06seqnum\x18\x02 \x02(\x05\"@\n\nUTruckSent\x12\x0f\n\x07truckid\x18\x01 \x02(\x05\x12\x11\n\tpackageid\x18\x02 \x02(\x03\x12\x0e\n\x06seqnum\x18\x03 \x02(\x05\"C\n\rUTruckArrived\x12\x0f\n\x07truckid\x18\x01 \x02(\x05\x12\x11\n\tpackageid\x18\x02 \x02(\x03\x12\x0e\n\x06seqnum\x18\x03 \x02(\x05\"-\n\nU2AWorldId\x12\x0f\n\x07worldid\x18\x01 \x02(\x05\x12\x0e\n\x06seqnum\x18\x02 \x02(\x05\"\x8b\x01\n\x04\x41Msg\x12\x1c\n\x08truckreq\x18\x01 \x03(\x0b\x32\n.ATruckReq\x12 \n\ndeliverreq\x18\x02 \x03(\x0b\x32\x0c.ADeliverReq\x12\x1a\n\x07loading\x18\x03 \x03(\x0b\x32\t.ALoading\x12\x0c\n\x04\x61\x63ks\x18\x04 \x03(\x05\x12\x19\n\x05\x65rror\x18\x05 \x03(\x0b\x32\n.Exception\"\xb4\x01\n\x04UMsg\x12\x1f\n\tdelivered\x18\x01 \x03(\x0b\x32\x0c.UDeliverRsp\x12\x1e\n\ttrucksent\x18\x02 \x03(\x0b\x32\x0b.UTruckSent\x12$\n\x0ctruckarrived\x18\x03 \x03(\x0b\x32\x0e.UTruckArrived\x12\x1c\n\x07worldid\x18\x04 \x03(\x0b\x32\x0b.U2AWorldId\x12\x0c\n\x04\x61\x63ks\x18\x05 \x03(\x05\x12\x19\n\x05\x65rror\x18\x06 \x03(\x0b\x32\n.Exception')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x61mazon_ups.proto\">\n\tException\x12\x0b\n\x03\x65rr\x18\x01 \x02(\t\x12\x14\n\x0coriginseqnum\x18\x02 \x02(\x05\x12\x0e\n\x06seqnum\x18\x03 \x02(\x05\"-\n\tWarehouse\x12\n\n\x02id\x18\x01 \x02(\x05\x12\t\n\x01x\x18\x02 \x02(\x05\x12\t\n\x01y\x18\x03 \x02(\x05\"9\n\x07Product\x12\n\n\x02id\x18\x01 \x02(\x03\x12\x13\n\x0b\x64\x65scription\x18\x02 \x02(\t\x12\r\n\x05\x63ount\x18\x03 \x02(\x05\"t\n\tATruckReq\x12\x16\n\x02wh\x18\x01 \x02(\x0b\x32\n.Warehouse\x12\x12\n\nupsaccount\x18\x02 \x01(\t\x12\x11\n\tpackageid\x18\x03 \x02(\x03\x12\x18\n\x06things\x18\x04 \x03(\x0b\x32\x08.Product\x12\x0e\n\x06seqnum\x18\x05 \x02(\x05\"a\n\x0b\x41\x44\x65liverReq\x12\x11\n\tpackageid\x18\x01 \x02(\x03\x12\x0f\n\x07truckid\x18\x02 \x02(\x05\x12\x0e\n\x06\x64\x65st_x\x18\x03 \x02(\x05\x12\x0e\n\x06\x64\x65st_y\x18\x04 \x02(\x05\x12\x0e\n\x06seqnum\x18\x05 \x02(\x05\"0\n\x0bUDeliverRsp\x12\x11\n\tpackageid\x18\x01 \x02(\x03\x12\x0e\n\x06seqnum\x18\x02 \x02(\x05\"@\n\nUTruckSent\x12\x0f\n\x07truckid\x18\x01 \x02(\x05\x12\x11\n\tpackageid\x18\x02 \x02(\x03\x12\x0e\n\x06seqnum\x18\x03 \x02(\x05\"C\n\rUTruckArrived\x12\x0f\n\x07truckid\x18\x01 \x02(\x05\x12\x11\n\tpackageid\x18\x02 \x02(\x03\x12\x0e\n\x06seqnum\x18\x03 \x02(\x05\"-\n\nU2AWorldId\x12\x0f\n\x07worldid\x18\x01 \x02(\x05\x12\x0e\n\x06seqnum\x18\x02 \x02(\x05\"o\n\x04\x41Msg\x12\x1c\n\x08truckreq\x18\x01 \x03(\x0b\x32\n.ATruckReq\x12 \n\ndeliverreq\x18\x02 \x03(\x0b\x32\x0c.ADeliverReq\x12\x0c\n\x04\x61\x63ks\x18\x03 \x03(\x05\x12\x19\n\x05\x65rror\x18\x04 \x03(\x0b\x32\n.Exception\"\xb4\x01\n\x04UMsg\x12\x1f\n\tdelivered\x18\x01 \x03(\x0b\x32\x0c.UDeliverRsp\x12\x1e\n\ttrucksent\x18\x02 \x03(\x0b\x32\x0b.UTruckSent\x12$\n\x0ctruckarrived\x18\x03 \x03(\x0b\x32\x0e.UTruckArrived\x12\x1c\n\x07worldid\x18\x04 \x03(\x0b\x32\x0b.U2AWorldId\x12\x0c\n\x04\x61\x63ks\x18\x05 \x03(\x05\x12\x19\n\x05\x65rror\x18\x06 \x03(\x0b\x32\n.Exception')
 
 
 
@@ -23,7 +23,6 @@ _WAREHOUSE = DESCRIPTOR.message_types_by_name['Warehouse']
 _PRODUCT = DESCRIPTOR.message_types_by_name['Product']
 _ATRUCKREQ = DESCRIPTOR.message_types_by_name['ATruckReq']
 _ADELIVERREQ = DESCRIPTOR.message_types_by_name['ADeliverReq']
-_ALOADING = DESCRIPTOR.message_types_by_name['ALoading']
 _UDELIVERRSP = DESCRIPTOR.message_types_by_name['UDeliverRsp']
 _UTRUCKSENT = DESCRIPTOR.message_types_by_name['UTruckSent']
 _UTRUCKARRIVED = DESCRIPTOR.message_types_by_name['UTruckArrived']
@@ -64,13 +63,6 @@ ADeliverReq = _reflection.GeneratedProtocolMessageType('ADeliverReq', (_message.
   # @@protoc_insertion_point(class_scope:ADeliverReq)
   })
 _sym_db.RegisterMessage(ADeliverReq)
-
-ALoading = _reflection.GeneratedProtocolMessageType('ALoading', (_message.Message,), {
-  'DESCRIPTOR' : _ALOADING,
-  '__module__' : 'amazon_ups_pb2'
-  # @@protoc_insertion_point(class_scope:ALoading)
-  })
-_sym_db.RegisterMessage(ALoading)
 
 UDeliverRsp = _reflection.GeneratedProtocolMessageType('UDeliverRsp', (_message.Message,), {
   'DESCRIPTOR' : _UDELIVERRSP,
@@ -127,18 +119,16 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _ATRUCKREQ._serialized_end=306
   _ADELIVERREQ._serialized_start=308
   _ADELIVERREQ._serialized_end=405
-  _ALOADING._serialized_start=407
-  _ALOADING._serialized_end=450
-  _UDELIVERRSP._serialized_start=452
-  _UDELIVERRSP._serialized_end=500
-  _UTRUCKSENT._serialized_start=502
-  _UTRUCKSENT._serialized_end=566
-  _UTRUCKARRIVED._serialized_start=568
-  _UTRUCKARRIVED._serialized_end=635
-  _U2AWORLDID._serialized_start=637
-  _U2AWORLDID._serialized_end=682
-  _AMSG._serialized_start=685
-  _AMSG._serialized_end=824
-  _UMSG._serialized_start=827
-  _UMSG._serialized_end=1007
+  _UDELIVERRSP._serialized_start=407
+  _UDELIVERRSP._serialized_end=455
+  _UTRUCKSENT._serialized_start=457
+  _UTRUCKSENT._serialized_end=521
+  _UTRUCKARRIVED._serialized_start=523
+  _UTRUCKARRIVED._serialized_end=590
+  _U2AWORLDID._serialized_start=592
+  _U2AWORLDID._serialized_end=637
+  _AMSG._serialized_start=639
+  _AMSG._serialized_end=750
+  _UMSG._serialized_start=753
+  _UMSG._serialized_end=933
 # @@protoc_insertion_point(module_scope)
