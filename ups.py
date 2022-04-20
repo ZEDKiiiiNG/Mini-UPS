@@ -141,8 +141,8 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             package_id = truck_req.packageid
             package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
             print("{}, {}, {}, {}, {}, {}, {}".format(truck_id, whid, whx, why, user_acc, package_id, package_status))
-            # TODO db.savePackage(), package_status = "truck en route to warehouse"
-            # TODO update truck_status to traveling
+            # TODO db.savePackage()
+            # TODO update truck_status to TRAVELING
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
@@ -167,9 +167,8 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             # TODO db.getDest()
-            # TODO update dest to amazon if address changed
-            # TODO db.updatePackageStatus "out_for_delivery"
-            # TODO db.updateTruckStatus "delivering"
+            # TODO db.updatePackageStatus OUT_FOR_DELIVERY
+            # TODO db.updateTruckStatus DELIVERING
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
@@ -183,8 +182,10 @@ def handle_completion(world_fd, ack_seqs, w_msg):
             x = completion.x
             y = completion.y
             status = completion.status
-            # TODO db.updateTruckStatus "idle" or "arrive warehouse"
-            # TODO if truck "arrive warehouse" update package_status to "truck waiting to for package"
+            print("{}, {}, {}, {}".format(truck_id, x, y, status))
+            # TODO db.updateTruckStatus with status
+            # if status == ARRIVE_WAREHOUSE:
+            # TODO update package_status to TRUCK_WAITING_FOR_PACKAGE
     return
 
 
@@ -215,7 +216,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
-                handle_completion(world_fd, ack_seqs, w_msg)
+                # handle_completion(world_fd, ack_seqs, w_msg)
                 handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UCommands)
         handle_resend(exp_seqs)
     return
