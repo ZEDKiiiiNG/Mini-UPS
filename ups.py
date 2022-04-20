@@ -192,7 +192,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_acks(a_msg, exp_seqs)
-            # handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
+            handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
