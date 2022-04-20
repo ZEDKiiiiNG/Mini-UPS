@@ -2,7 +2,7 @@ from constant import *
 from ups import *
 import amazon_ups_pb2
 import time
-from google.protobuf.internal.decoder import _DecodeVarint32
+
 
 def test_resend(ups_fd):
     count = 10
@@ -30,11 +30,12 @@ def test_truck_req(ups_fd):
     truck_req.wh.x = 7
     truck_req.wh.y = 8
     truck_req.things.add(id=4, description="banana", count=5)
-    send_msg_sleep(ups_fd, a_msg)
+    send_msg(ups_fd, a_msg)
     recv_ack(ups_fd)
 
     # amazon recv truck_sent and send ack to ups
-    u_msg2 = recv_stream_msg(ups_fd, amazon_ups_pb2.UMsg)[0]
+    u_msg2 = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
+    print(u_msg2)
     for truck_sent in u_msg2.trucksent:
         seq = truck_sent.seqnum
         send_ack(ups_fd, seq, amazon_ups_pb2.AMsg)
@@ -45,44 +46,16 @@ def test_deliver_req(ups_fd):
     # amazon send deliver_req and recv ack from ups
     a_msg = amazon_ups_pb2.AMsg()
     a_msg.deliverreq.add(packageid=2, truckid=2, dest_x=5, dest_y=8, seqnum=21)
-    send_msg_sleep(ups_fd, a_msg)
+    send_msg(ups_fd, a_msg)
     recv_ack(ups_fd)
     return
 
-# only for test
-def send_msg_sleep(fd, msg):
-    time.sleep(2)
-    send_msg(fd, msg)
-    return
 
 def recv_ack(ups_fd):
     u_msg = recv_msg(ups_fd, amazon_ups_pb2.UMsg)
     for ack in u_msg.acks:
         print("ack: {}".format(ack))
     return
-
-# only for test
-# def recv_msg(fd, msg_type):
-#     buffer = []
-#     while True:
-#         buffer += fd.recv(1)
-#         msg_len, pos = _DecodeVarint32(buffer, 0)
-#         if pos != 0:
-#             break
-#     msg = msg_type()
-#     msg_str = fd.recv(msg_len)
-#     msg.ParseFromString(msg_str)
-#     return msg
-
-def recv_msg(fd, msg_type):
-    temp = fd.recv(1)
-    if not temp:
-        return temp
-    msg_len, _ = _DecodeVarint32(temp, 0)
-    msg = msg_type()
-    msg_str = fd.recv(msg_len)
-    msg.ParseFromString(msg_str)
-    return msg
 
 
 def main():
