@@ -34,6 +34,11 @@ message ADeliverReq {
     required int32 seqnum = 5;
 }
 
+message ALoading {
+    required int32 truckid = 1;
+    required int32 seqnum = 2;
+}
+
 message UDeliverRsp{
     required int64 packageid = 1;
     required int32 seqnum = 2;
@@ -59,8 +64,9 @@ message U2AWorldId {
 message AMsg {
     repeated ATruckReq truckreq = 1;
     repeated ADeliverReq deliverreq = 2;
-    repeated int32 acks = 3;
-    repeated Exception error = 4;
+    repeated ALoading loading = 3;
+    repeated int32 acks = 4;
+    repeated Exception error = 5;
 }
 
 message UMsg {
