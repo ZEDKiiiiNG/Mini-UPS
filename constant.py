@@ -1,5 +1,5 @@
 WORLD_HOST = "vcm-24846.vm.duke.edu"
-WORLD_PORT = 23456
+WORLD_PORT = 12345
 MSG_LEN = 1024
 UPS_HOST = "vcm-24846.vm.duke.edu"
 UPS_PORT = 34567
