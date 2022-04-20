@@ -137,16 +137,7 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             truck_id = 2 # TODO truck_id = db.getPickupTruck()
             whid = truck_req.wh.id
             package_id = truck_req.packageid
-            # whx = truck_req.wh.x
-            # why = truck_req.wh.y
-            # if truck_req.HASFIELD("upsaccout"):
-            #     user_acc = truck_req.upsaccount
-            # else:
-            #     user_acc = ""
-            # package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE  # only one package on truck
-            # parse and store the products
-            # print("{}, {}, {}, {}, {}, {}, {}".format(truck_id, whid, whx, why, user_acc, package_id, package_status))
-            # TODO db.save_package(truck_req, truck_id)
+            # TODO db.save_package(truck_req, truck_id), package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
             # TODO update truck_status to TRAVELING
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
