@@ -117,8 +117,8 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             truck_id = get_pickup_truck()
             whid = truck_req.wh.id
             package_id = truck_req.packageid
-            # TODO db.save_package(truck_req, truck_id), package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
-            # TODO update truck_status to TRAVELING
+            db.savePackage(truck_id, truck_req)
+            db.updateTruckstatus(truck_id, TRAVELING)
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return

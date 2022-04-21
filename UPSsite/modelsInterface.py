@@ -14,8 +14,9 @@ def createUser(username,password1,email):
     new_user.password = password1
     new_user.email = email
     new_user.save()
-def savePackage(truck_id,truck_req):
 
+
+def savePackage(truck_id,truck_req):
     whid = truck_req.wh.id
     whx = truck_req.wh.x
     why = truck_req.wh.y
