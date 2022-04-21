@@ -22,6 +22,7 @@ def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
     curr_seq[0] += 1
     return
 
+
 def recv_stream_msg(fd, msg_type):
     buf = fd.recv(MSG_LEN)
     ans = []
