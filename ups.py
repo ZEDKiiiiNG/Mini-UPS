@@ -170,6 +170,7 @@ def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, des
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
+
 def get_dest(dest_x, dest_y, package_id):
     new_dest_x, new_dest_y = db.getDest(package_id)
     if new_dest_x == -1 or new_dest_y == -1:
@@ -188,11 +189,9 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             x = completion.x
             y = completion.y
             status = completion.status
-            # TODO db.updateTruckStatus with status
+            db.updateTruckstatus(truck_id, status)
             if status == ARRIVE_WAREHOUSE:
-                # TODO for each package status = TRUCK_EN_ROUTE_TO_WAREHOUSE
-                #  db.updatePackageStatus to TRUCK_WAITING_FOR_PACKAGE, return package_id
-                package_ids = [2, 3]
+                package_ids = db.updatePackagestatusAccordingTruck(truck_id, x, y)
                 send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids)
     return
 
