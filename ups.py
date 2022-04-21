@@ -80,21 +80,6 @@ def connect_world(world_fd):
     return world_id
 
 
-def send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid):
-    u_msg = world_ups_pb2.UCommands()
-    u_msg.pickups.add(truckid=truck_id, whid=whid, seqnum=curr_seq[0])
-    send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
-    return
-
-
-def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y):
-    u_msg = world_ups_pb2.UCommands()
-    deliver = u_msg.deliveries.add(truckid=truck_id, seqnum=curr_seq[0])
-    deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
-    send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
-    return
-
-
 def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     u_msg = amazon_ups_pb2.UMsg()
     u_msg.worldid.add(worldid=world_id, seqnum=curr_seq[0])
@@ -102,18 +87,11 @@ def send_world_id(amazon_fd, world_id, curr_seq, exp_seqs):
     return
 
 
-def send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id):
-    u_msg = amazon_ups_pb2.UMsg()
-    u_msg.trucksent.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
-    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
-    return
-
-
-def handle_acks(msg, exp_seqs):
-    for ack in msg.acks:
-        print("ack: {}".format(ack))
-        if ack in exp_seqs:
-            exp_seqs.pop(ack)
+def send_ack(fd, seq, msg_type):
+    print("seq: {}".format(seq))
+    msg = msg_type()
+    msg.acks.append(seq)
+    send_msg(fd, msg)
     return
 
 
@@ -128,6 +106,7 @@ def handle_resend(exp_seqs):
     return
 
 
+# AMAZON CASE 1
 def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for truck_req in a_msg.truckreq:
         seq = truck_req.seqnum
@@ -144,14 +123,21 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     return
 
 
-def send_ack(fd, seq, msg_type):
-    print("seq: {}".format(seq))
-    msg = msg_type()
-    msg.acks.append(seq)
-    send_msg(fd, msg)
+def send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid):
+    u_msg = world_ups_pb2.UCommands()
+    u_msg.pickups.add(truckid=truck_id, whid=whid, seqnum=curr_seq[0])
+    send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
 
+def send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id):
+    u_msg = amazon_ups_pb2.UMsg()
+    u_msg.trucksent.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
+    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
+    return
+
+
+# AMAZON CASE 2
 def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
     for deliver_req in a_msg.deliverreq:
         seq = deliver_req.seqnum
@@ -168,14 +154,15 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
     return
 
 
-def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
-    u_msg = amazon_ups_pb2.UMsg()
-    for package_id in package_ids:
-        u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq)
-    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
+def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y):
+    u_msg = world_ups_pb2.UCommands()
+    deliver = u_msg.deliveries.add(truckid=truck_id, seqnum=curr_seq[0])
+    deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
+    send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
 
 
+# WORLD CASE 1
 def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     for completion in w_msg.completions:
         seq = completion.seqnum
@@ -196,23 +183,47 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     return
 
 
-def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
-
+def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
+    u_msg = amazon_ups_pb2.UMsg()
+    for package_id in package_ids:
+        u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
+    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
 
 
+# WORLD CASE 2
 def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     for delivered in w_msg.delivered:
         seq = delivered.seqnum
         send_ack(world_fd, seq, world_ups_pb2.UResponses)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
+            package_id = delivered.packageid
+            # TODO update package status to Delivered
             # u_msg = amazon_ups_pb2.UMsg()
             # u_msg.add()
             # send_msg_with_seq(amazon_fd, msg, curr_seq, exp_seqs)
+            send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id)
     return
 
 
+def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
+    u_msg = amazon_ups_pb2.UMsg()
+    u_msg.delivered.add(pacakgeid=package_id, seqnum=curr_seq[0])
+    send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
+    return
+
+
+# CASE 3
+def handle_acks(msg, exp_seqs):
+    for ack in msg.acks:
+        print("ack: {}".format(ack))
+        if ack in exp_seqs:
+            exp_seqs.pop(ack)
+    return
+
+
+# CASE 4
 def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
     for error in msg.error:
         err_msg = error.err
@@ -241,6 +252,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             for w_msg in w_msgs:
                 handle_completion(world_fd, ack_seqs, w_msg)
                 handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
+                handle_acks(w_msg, exp_seqs)
                 handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UCommands)
         handle_resend(exp_seqs)
     return
