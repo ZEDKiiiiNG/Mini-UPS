@@ -24,7 +24,7 @@ def test_send_world_id(ups_fd):
 def test_truck_req(ups_fd):
     # amazon send truck_req and recv ack from ups
     a_msg = amazon_ups_pb2.AMsg()
-    truck_req = a_msg.truckreq.add(upsaccount="test_user", packageid=2, seqnum=20)
+    truck_req = a_msg.truckreq.add(upsaccount="test_user2", packageid=2, seqnum=20)
     # only have add() for repeated field
     truck_req.wh.id = 6
     truck_req.wh.x = 7

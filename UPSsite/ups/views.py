@@ -2,6 +2,7 @@ from django.shortcuts import render
 from . import models
 # Create your views here.
 from django.shortcuts import render,redirect
+from django.db.models import Q
 from .forms import UserForm, RegisterForm, ChangeDestinationForm, SearchPackageForm
 def index(request):
     serachForm = SearchPackageForm()
@@ -13,6 +14,10 @@ def index(request):
                 searchList = models.Package.objects.filter(pkgId=searchId)
                 if len(searchList) == 0:
                     message = "No matched package found！"
+                    return render(request, 'login/index.html', locals())
+                searchItem = models.Package.objects.get(pkgId=searchId)
+                searchItemProducts = models.Product.objects.filter(package = searchItem)
+
     if request.session.get('is_login', None):
         username = request.session.get('user_name', None)
         user = models.User.objects.get(name=username)

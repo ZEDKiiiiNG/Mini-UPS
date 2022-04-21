@@ -4,7 +4,8 @@ import django
 django.setup()
 import ups.models
 from constant import *
-
+from django.core.mail import send_mail
+from UPSsite.settings import EMAIL_HOST_USER
 
 def createUser(username, password1, email):
     new_user = ups.models.User.objects.create()
@@ -28,21 +29,16 @@ def savePackage(truck_id, truck_req):
 
 
 def createPackage(pkgId,whId,whX,whY,username,truckId,pkgStatus, destX = -1 ,destY = -1):
-    # new_pkg = ups.models.Package.objects.create()
-    # new_pkg.pkgId = pkgId
-    # new_pkg.whId = whId
-    # new_pkg.whX = whX
-    # new_pkg.whY = whY
-    # new_pkg.destX = destX
-    # new_pkg.destY = destY
-    user = ups.models.User.objects.get(name=username)
-    # new_pkg.user = user
-    # new_pkg.truckId = truckId
-    # new_pkg.pkgStatus = pkgStatus
+    try:
+        user = ups.models.User.objects.get(name=username)
+    except:
+        user = ups.models.User.objects.get(name='default_user')
     truck = ups.models.Truck.objects.get(truckId = truckId)
     new_pkg = ups.models.Package(pkgId= pkgId, whId = whId, whX = whX, whY = whY, destX = destX, destY = destY,
                                  user= user, truck = truck, pkgStatus =pkgStatus)
     new_pkg.save()
+
+
 def createProduct(productId,productDescrip,productCount,pkgId):
     package = ups.models.Package.objects.get(pkgId=pkgId)
     # new_prod = ups.models.Product.objects.create()
@@ -91,8 +87,19 @@ def updatePackagestatusAccordingTruck(truckId, X, Y):
 
 def updatePackagestatus(pkgId, pkgStatus):
     package = ups.models.Package.objects.get(pkgId=pkgId)
+    user_email = package.user
     package.pkgStatus = pkgStatus
     package.save()
+    email_list = []
+    email_list.append(package.user.email)
+    if pkgStatus == DELIVERED:
+        send_mail(
+            subject='Package delivered',
+            message='Your ride has already been confrimed',
+            from_email=EMAIL_HOST_USER,
+            recipient_list=email_list,
+            fail_silently=False
+        )
 def getDest(pkgId):
     package = ups.models.Package.objects.get(pkgId=pkgId)
     return [package.destX, package.destY]

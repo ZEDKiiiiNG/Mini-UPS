@@ -26,6 +26,7 @@
           <th><div style="width:100%;text-align:center"> Destination location </div></th>
           <th><div style="width:100%;text-align:center"> Truck  </div></th>
           <th><div style="width:100%;text-align:center"> Package Status </div></th>
+          <th><div style="width:100%;text-align:center"> Package details </div></th>
       <th></th>
           </tr>
         </thead>
@@ -38,7 +39,11 @@
           <td><div style="width:100%;text-align:center">{{package_item.destX}}, {{package_item.destY}}</div></td>
           <td><div style="width:100%;text-align:center"> ID: {{package_item.truck.truckId}}, Status: {{package_item.truck.truckStatus}} </div></td>
           <td><div style="width:100%;text-align:center">{{package_item.pkgStatus}} </div></td>
-
+            <td><div style="width:100%;text-align:center">
+                {% for product_item in searchItemProducts %}
+                Product Id: {{product_item.productId}}, Product description: {{product_item.productDescrip}}, Product Count: {{product_item.productCount}}
+                {% endfor %}
+            </div></td>
     </tr>
         {% endfor %}
         </tbody>
@@ -47,11 +52,6 @@
 <div class="container-fluid">
 <div style="width:100%;text-align:center" >
     <h1>Hello,{{ request.session.user_name }}！Welcome back！！</h1>
-    <form method="GET"> <div style="width:100%;text-align:center" >
-      <button type="submit" class="btn btn-primary" name="Passenger">Passenger</button>
-      <button type="submit" class="btn btn-primary" name="Driver">Driver</button>
-    </div>
-    </form>
 </div>
 </div>
 <h2><div style="width:100%;text-align:center"> Your own shipment
@@ -68,6 +68,7 @@
           <th><div style="width:100%;text-align:center"> Destination location </div></th>
           <th><div style="width:100%;text-align:center"> Truck  </div></th>
           <th><div style="width:100%;text-align:center"> Package Status </div></th>
+            <th><div style="width:100%;text-align:center"> Package details </div></th>
           <th><div style="width:100%;text-align:center"> Operation </div></th>
       <th></th>
           </tr>
@@ -82,6 +83,11 @@
           <td><div style="width:100%;text-align:center">{{package_item.destX}}, {{package_item.destY}}</div></td>
           <td><div style="width:100%;text-align:center"> ID: {{package_item.truck.truckId}}, Status: {{package_item.truck.truckStatus}} </div></td>
           <td><div style="width:100%;text-align:center">{{package_item.pkgStatus}} </div></td>
+       <td><div style="width:100%;text-align:center">
+           {% for product_item in package_item.product_set.all %}
+                Product Id: {{product_item.productId}}, Product description: {{product_item.productDescrip}}, Product Count: {{product_item.productCount}}
+            {% endfor %}
+       </div></td>
         {% if package_item.pkgStatus != 'out for delivery' %}
       <td><div style="width:100%;text-align:center">
           <form method="POST" class="form-group" >
