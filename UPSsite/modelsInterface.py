@@ -81,14 +81,16 @@ def updateTruckstatusAndLocation(truckId,truckStatus,truckX, truckY):
 
 
 def updatePackagestatusAccordingTruck(truckId, X, Y):
-    truck = ups.models.Truck.objects.get(truckId = truckId)
-    packages = ups.models.Package.objects.filter(truck = truck,pkgStatus = TRUCK_EN_ROUTE_TO_WAREHOUSE, whX  =  X, whY = Y)
+    truck = ups.models.Truck.objects.get(truckId=truckId)
+    packages = ups.models.Package.objects.filter(truck=truck, pkgStatus=TRUCK_EN_ROUTE_TO_WAREHOUSE, whX=X, whY=Y)
     result_list = []
     for package in packages:
         package.pkgStatus = TRUCK_WAITING_FOR_PACKAGE
         package.save()
         result_list.append(package.pkgId)
     return result_list
+
+
 def updatePackagestatus(pkgId, pkgStatus):
     package = ups.models.Package.objects.get(pkgId=pkgId)
     package.pkgStatus = pkgStatus
