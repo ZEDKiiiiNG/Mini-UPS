@@ -6,6 +6,7 @@ from constant import *
 import amazon_ups_pb2
 import time
 import select
+import UPSsite.modelsInterface as db
  
 
 def send_msg(fd, msg):
@@ -113,7 +114,7 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
-            truck_id = 2 # TODO truck_id = db.getPickupTruck()
+            truck_id = get_pickup_truck()
             whid = truck_req.wh.id
             package_id = truck_req.packageid
             # TODO db.save_package(truck_req, truck_id), package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
@@ -121,6 +122,14 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
+
+
+def get_pickup_truck():
+    truck_id = -1
+    while truck_id == -1:
+        truck_id = db.getPickupTruck()
+        time.sleep(RETRY_INTERVAL)
+    return truck_id
 
 
 def send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid):
