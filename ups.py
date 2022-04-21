@@ -220,7 +220,7 @@ def handle_acks(msg, exp_seqs):
 
 
 # COMMON CASE 2
-def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
+def handle_error(fd, ack_seqs, msg, msg_type):
     for error in msg.error:
         err_msg = error.err
         origin_seq = error.originseqnum
@@ -241,14 +241,14 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             handle_acks(a_msg, exp_seqs)
-            handle_error(amazon_fd, exp_seqs, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
+            handle_error(amazon_fd, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
                 handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_acks(w_msg, exp_seqs)
-                handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UCommands)
+                handle_error(world_fd, ack_seqs, w_msg, world_ups_pb2.UCommands)
         handle_resend(exp_seqs)
     return
 
