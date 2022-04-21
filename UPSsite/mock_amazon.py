@@ -1,5 +1,5 @@
 from constant import *
-from ups import *
+from ups_service import *
 import amazon_ups_pb2
 import time
 
