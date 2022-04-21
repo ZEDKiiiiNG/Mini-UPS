@@ -5,6 +5,8 @@ django.setup()
 import ups.models
 import world_ups_pb2
 import amazon_ups_pb2
+from ..constant import *
+
 
 def createUser(username,password1,email):
     new_user = ups.models.User.objects.create()
