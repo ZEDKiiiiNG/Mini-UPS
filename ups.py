@@ -227,7 +227,6 @@ def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
         seq = error.seqnum
         send_ack(fd, seq, msg_type)
         if seq not in ack_seqs:
-            exp_seqs.pop(origin_seq)
             ack_seqs.add(seq)
             print("origin seq: {}".format(origin_seq))
             print("{}".format(err_msg))
