@@ -3,7 +3,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'UPSsite.settings')
 import django
 django.setup()
 import ups.models
-from ..constant import *
+from constant import *
 
 
 def createUser(username, password1, email):

@@ -6,7 +6,7 @@ from constant import *
 import amazon_ups_pb2
 import time
 import select
-import UPSsite.modelsInterface as db
+import modelsInterface as db
  
 
 def send_msg(fd, msg):
