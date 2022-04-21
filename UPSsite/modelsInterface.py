@@ -3,6 +3,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'UPSsite.settings')
 import django
 django.setup()
 import ups.models
+import world_ups_pb2
+import amazon_ups_pb2
 
 def createUser(username,password1,email):
     new_user = ups.models.User.objects.create()
@@ -10,7 +12,21 @@ def createUser(username,password1,email):
     new_user.password = password1
     new_user.email = email
     new_user.save()
-def createPackage(pkgId,whId,whX,whY,destX,destY,username,truckId,pkgStatus):
+def savePackage(truck_id,truck_req):
+
+    whid = truck_req.wh.id
+    whx = truck_req.wh.x
+    why = truck_req.wh.y
+    user_acc = truck_req.upsaccount
+    package_id = truck_req.packageid
+    package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
+    # TODO: check
+    createPackage(package_id, whid, whx, why, user_acc, truck_id, package_status)
+    for product in truck_req.things:
+        createProduct(product.id, product.description,product.count, package_id)
+
+
+def createPackage(pkgId,whId,whX,whY,username,truckId,pkgStatus, destX = -1 ,destY = -1):
     # new_pkg = ups.models.Package.objects.create()
     # new_pkg.pkgId = pkgId
     # new_pkg.whId = whId
@@ -52,6 +68,24 @@ def updateTruckstatus(truckId,truckStatus):
     truck.truckStatus = truckStatus
     truck.save()
 
+
+def updateTruckstatusAndLocation(truckId,truckStatus,truckX, truckY):
+    truck = ups.models.Truck.objects.get(truckId = truckId)
+    truck.truckStatus = truckStatus
+    truck.truckX = truckX
+    truck.truckY = truckY
+    truck.save()
+
+
+def updatePackagestatusAccordingTruck(truckId, X, Y):
+    truck = ups.models.Truck.objects.get(truckId = truckId)
+    packages = ups.models.Package.objects.filter(truck = truck,pkgStatus = TRUCK_EN_ROUTE_TO_WAREHOUSE, whX  =  X, whY = Y)
+    result_list = []
+    for package in packages:
+        package.pkgStatus = TRUCK_WAITING_FOR_PACKAGE
+        package.save()
+        result_list.append(package.pkgId)
+    return result_list
 def updatePackagestatus(pkgId, pkgStatus):
     package = ups.models.Package.objects.get(pkgId=pkgId)
     package.pkgStatus = pkgStatus

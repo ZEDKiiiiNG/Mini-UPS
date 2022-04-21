@@ -6,6 +6,8 @@ from constant import *
 import amazon_ups_pb2
 import time
 import select
+import modelsInterface
+
 
 
 def send_msg(fd, msg):
@@ -135,6 +137,14 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
         package_id = truck_req.packageid
         if seq not in ack_seqs:
             ack_seqs.add(seq)
+            truck_id = modelsInterface.getPickupTruck()
+            whx = truck_req.wh.x
+            why = truck_req.wh.y
+            user_acc = truck_req.upsaccount
+            package_status = TRUCK_EN_ROUTE_TO_WAREHOUSE
+
+            modelsInterface.createPackage(package_id, whid, whx, why, user_acc,truck_id,package_status)
+            modelsInterface.updateTruckstatus(truck_id, TRUCK_EN_ROUTE_TO_WAREHOUSE)
             # TODO db.savePackage(), package_status = "truck en route to warehouse"
             # TODO truck_id = db.getPickupTruck(), truck_status = "traveling"
             truck_id = 2
@@ -161,6 +171,11 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         dest_y = deliver_req.dest_y
         if seq not in ack_seqs:
             ack_seqs.add(seq)
+            dest_db_x, dest_db_y = modelsInterface.getDest(package_id)
+            if dest_db_x != -1 or dest_db_y != -1:
+                dest_x = dest_db_x
+                dest_y = dest_db_y
+            modelsInterface.updatePackagestatus(package_id, OUT_FOR_DELIVERY)
             # TODO db.getDest()
             # TODO update dest to amazon if address changed
             # TODO db.updatePackageStatus "out_for_delivery"
