@@ -3,12 +3,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'UPSsite.settings')
 import django
 django.setup()
 import ups.models
-import world_ups_pb2
-import amazon_ups_pb2
 from ..constant import *
 
 
-def createUser(username,password1,email):
+def createUser(username, password1, email):
     new_user = ups.models.User.objects.create()
     new_user.name = username
     new_user.password = password1
@@ -16,7 +14,7 @@ def createUser(username,password1,email):
     new_user.save()
 
 
-def savePackage(truck_id,truck_req):
+def savePackage(truck_id, truck_req):
     whid = truck_req.wh.id
     whx = truck_req.wh.x
     why = truck_req.wh.y
