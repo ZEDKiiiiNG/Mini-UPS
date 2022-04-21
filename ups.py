@@ -157,8 +157,8 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         dest_y = deliver_req.dest_y
         if seq not in ack_seqs:
             ack_seqs.add(seq)
-            # TODO db.getDest()
-            # TODO update package status to OUT_FOR_DELIVERY
+            dest_x, dest_y = get_dest(dest_x, dest_y, package_id)
+            db.updatePackagestatus(package_id, OUT_FOR_DELIVERY)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
@@ -169,6 +169,12 @@ def send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, des
     deliver.packages.add(packageid=package_id, x=dest_x, y=dest_y)
     send_msg_with_seq(world_fd, u_msg, curr_seq, exp_seqs)
     return
+
+def get_dest(dest_x, dest_y, package_id):
+    new_dest_x, new_dest_y = db.getDest(package_id)
+    if new_dest_x == -1 or new_dest_y == -1:
+        return dest_x, dest_y
+    return new_dest_x, new_dest_y
 
 
 # WORLD CASE 1
