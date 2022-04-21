@@ -167,12 +167,14 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
+
 def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
     u_msg = amazon_ups_pb2.UMsg()
     for package_id in package_ids:
         u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq)
     send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
+
 
 def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     for completion in w_msg.completions:
@@ -189,12 +191,15 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             if status == ARRIVE_WAREHOUSE:
                 # TODO for each package status = TRUCK_EN_ROUTE_TO_WAREHOUSE
                 #  db.updatePackageStatus to TRUCK_WAITING_FOR_PACKAGE, return package_id
-                package_id = 2
-                send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
+                package_ids = [2, 3]
+                send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids)
     return
 
-def send_deliver_resp():
+
+def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
+
     return
+
 
 def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     for delivered in w_msg.delivered:
