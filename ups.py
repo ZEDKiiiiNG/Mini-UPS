@@ -212,7 +212,7 @@ def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             package_id = delivered.packageid
-            # TODO update package status to Delivered
+            db.updatePackagestatus(package_id, DELIVERED)
             send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id)
     return
 
