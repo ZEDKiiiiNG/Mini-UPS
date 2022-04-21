@@ -173,7 +173,6 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             x = completion.x
             y = completion.y
             status = completion.status
-            print("{}, {}, {}, {}".format(truck_id, x, y, status))
             # TODO db.updateTruckStatus with status
             if status == ARRIVE_WAREHOUSE:
                 # TODO for each package status = TRUCK_EN_ROUTE_TO_WAREHOUSE
@@ -200,9 +199,6 @@ def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             ack_seqs.add(seq)
             package_id = delivered.packageid
             # TODO update package status to Delivered
-            # u_msg = amazon_ups_pb2.UMsg()
-            # u_msg.add()
-            # send_msg_with_seq(amazon_fd, msg, curr_seq, exp_seqs)
             send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id)
     return
 
@@ -214,7 +210,7 @@ def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
     return
 
 
-# CASE 3
+# COMMON CASE 1
 def handle_acks(msg, exp_seqs):
     for ack in msg.acks:
         print("ack: {}".format(ack))
@@ -223,7 +219,7 @@ def handle_acks(msg, exp_seqs):
     return
 
 
-# CASE 4
+# COMMON CASE 2
 def handle_error(fd, exp_seqs, ack_seqs, msg, msg_type):
     for error in msg.error:
         err_msg = error.err
