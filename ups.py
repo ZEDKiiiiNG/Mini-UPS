@@ -246,7 +246,7 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
-                handle_completion(world_fd, ack_seqs, w_msg)
+                handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_acks(w_msg, exp_seqs)
                 handle_error(world_fd, exp_seqs, ack_seqs, w_msg, world_ups_pb2.UCommands)
