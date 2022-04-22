@@ -229,6 +229,21 @@ def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
     return
 
 
+# WORLD CASE 3
+def handle_finish(world_fd, w_msg, world_id):
+    if w_msg.HASFIELD("finished") and w_msg.finished:
+        send_reconnect(world_fd, world_id)
+    return
+
+
+def send_reconnect(world_fd, world_id):
+    u_msg = world_ups_pb2.UConnect()
+    u_msg.worldid = world_id
+    u_msg.isAmazon = False
+    send_msg(world_fd, u_msg)
+    return
+
+
 # COMMON CASE 1
 def handle_acks(msg, exp_seqs):
     for ack in msg.acks:
@@ -252,7 +267,7 @@ def handle_error(fd, ack_seqs, msg, msg_type):
     return
 
 
-def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
+def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
@@ -264,13 +279,14 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_error(amazon_fd, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
-            if w_msgs != []:
+            if not w_msgs:
                 print("receive w_msgs: {}".format(w_msgs))
             for w_msg in w_msgs:
                 handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_acks(w_msg, exp_seqs)
                 handle_error(world_fd, ack_seqs, w_msg, world_ups_pb2.UCommands)
+                handle_finish(world_fd, w_msg, world_id)
         handle_resend(exp_seqs)
     return
 
@@ -287,7 +303,7 @@ def main():
         world_fd = build_client(WORLD_HOST, WORLD_PORT)
         world_id = connect_world(world_fd)
         send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
-        run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs)
+        run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id)
     except (KeyboardInterrupt, Exception):
         listen_fd.close()
         amazon_fd.close()
