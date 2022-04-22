@@ -27,6 +27,7 @@
           <th><div style="width:100%;text-align:center"> Truck  </div></th>
           <th><div style="width:100%;text-align:center"> Package Status </div></th>
           <th><div style="width:100%;text-align:center"> Package details </div></th>
+            <th><div style="width:100%;text-align:center"> Operation </div></th>
       <th></th>
           </tr>
         </thead>
@@ -44,6 +45,25 @@
                 Product Id: {{product_item.productId}}, Product description: {{product_item.productDescrip}}, Product Count: {{product_item.productCount}}
                 {% endfor %}
             </div></td>
+       {% if is_log_in != True%}
+       <td><div style="width:100%;text-align:center">
+           plase log in first
+       </div></td>
+       {% else %}
+           {% if package_item.user.name != 'default_user' %}
+           <td><div style="width:100%;text-align:center">
+               This pacakge belongs to someone cannot be added
+           </div></td>
+           {% else %}
+           <td><div style="width:100%;text-align:center">
+
+        <form method="POST">
+            {% csrf_token %}
+        <button type="submit" class="btn btn-primary" name="addAsOwn" value= {{ package_item.pkgId }}>Add as Own</button>
+        </form>
+           </div></td>
+           {% endif %}
+       {% endif %}
     </tr>
         {% endfor %}
         </tbody>

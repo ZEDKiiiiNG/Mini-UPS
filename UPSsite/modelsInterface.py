@@ -106,11 +106,12 @@ def getDest(pkgId):
 
 
 if __name__ == '__main__':
-   createUser(2,2,"2@2.com")
-   createTruck(1,1,1,"idle")
-   createPackage(1,1,1,1,2,2,2,1,"truck	en	route	to	warehouse")
-   createProduct(1,'pd1',1,1)
+   # createUser(2,2,"2@2.com")
+   # createTruck(1,1,1,"idle")
+   # createPackage(1,1,1,1,2,2,2,1,"truck	en	route	to	warehouse")
+   # createProduct(1,'pd1',1,1)
    # print("getPickupTruck() : {}" .format(getPickupTruck()))
    # print("updateTruckstatus : {}", updateTruckstatus(1,"traveling"))
-   # print("updatePackagestatus : {}" .format(updatePackagestatus(1, "truck	waiting	for	package")))
+   print("updatePackagestatus : {}" .format(updatePackagestatus(2, DELIVERED)))
    # print("getDest() : {}".format(getDest(1)))
+

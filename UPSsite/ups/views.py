@@ -6,6 +6,7 @@ from django.db.models import Q
 from .forms import UserForm, RegisterForm, ChangeDestinationForm, SearchPackageForm
 def index(request):
     serachForm = SearchPackageForm()
+    is_log_in  = request.session.get('is_login', False)
     if request.method == "POST" and request.POST:
         if 'Search' in request.POST:
             serachForm = SearchPackageForm(request.POST)
@@ -17,6 +18,13 @@ def index(request):
                     return render(request, 'login/index.html', locals())
                 searchItem = models.Package.objects.get(pkgId=searchId)
                 searchItemProducts = models.Product.objects.filter(package = searchItem)
+        if 'addAsOwn' in request.POST and is_log_in:
+            username = request.session.get('user_name', None)
+            user = models.User.objects.get(name=username)
+            add_id = request.POST.get('addAsOwn')
+            pkg_item = models.Package.objects.get(pkgId=add_id)
+            pkg_item.user = user
+            pkg_item.save()
 
     if request.session.get('is_login', None):
         username = request.session.get('user_name', None)
