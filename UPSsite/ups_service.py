@@ -10,14 +10,15 @@ import modelsInterface as db
  
 
 def send_msg(fd, msg):
+    print("send msg {}".format(msg))
     msg_str = msg.SerializeToString()
     _EncodeVarint(fd.sendall, len(msg_str), None)
-    print("send encode msg: {}".format(msg_str))
     fd.sendall(msg_str)
     return
 
 
 def send_msg_with_seq(fd, msg, curr_seq, exp_seqs):
+    print("send msg {}".format(msg))
     send_msg(fd, msg)
     exp_seqs[curr_seq[0]] = [fd, msg, time.time()]
     curr_seq[0] += 1
