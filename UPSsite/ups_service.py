@@ -264,7 +264,8 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs):
             handle_error(amazon_fd, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
-            print("receive w_msgs: {}".format(w_msgs))
+            if w_msgs != []:
+                print("receive w_msgs: {}".format(w_msgs))
             for w_msg in w_msgs:
                 handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
@@ -287,10 +288,10 @@ def main():
         world_id = connect_world(world_fd)
         send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
         run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs)
-    except KeyboardInterrupt:
-        print("keyboard interrupt")
+    except (KeyboardInterrupt, Exception):
         listen_fd.close()
         amazon_fd.close()
+        print("Exception: {}".format((Exception)))
     return
 
 
