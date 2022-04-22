@@ -10,7 +10,8 @@ CONNECTED = "connected!"
 # truck status
 IDLE = "idle"
 TRAVELING = "traveling"
-ARRIVE_WAREHOUSE = "arrive warehouse"
+# ARRIVE_WAREHOUSE = "arrive warehouse"
+ARRIVE_WAREHOUSE = "ARRIVE WAREHOUSE"
 LOADING = "loading"
 DELIVERING = "delivering"
 
