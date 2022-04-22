@@ -19,7 +19,7 @@ class Truck(models.Model):
     truckStatus = models.CharField(max_length=200, default='', null=True)
 
 class Package(models.Model):
-    pkgId = models.IntegerField(default=-1, primary_key=True,unique=True)
+    pkgId = models.BigIntegerField(default=-1, primary_key=True,unique=True)
     whId = models.IntegerField(default=-1)
     whX = models.IntegerField(default=-1)
     whY = models.IntegerField(default=-1)
