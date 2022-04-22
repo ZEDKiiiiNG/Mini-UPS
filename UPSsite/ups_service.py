@@ -12,6 +12,7 @@ import modelsInterface as db
 def send_msg(fd, msg):
     msg_str = msg.SerializeToString()
     _EncodeVarint(fd.sendall, len(msg_str), None)
+    print("send encode msg: {}".format(msg_str))
     fd.sendall(msg_str)
     return
 
@@ -41,6 +42,7 @@ def recv_stream_msg(fd, msg_type):
 def recv_msg(fd, msg_type):
     buffer = []
     while True:
+        print("buffer: {}".format(buffer))
         buffer += fd.recv(1)
         msg_len, pos = _DecodeVarint32(buffer, 0)
         if pos != 0:
