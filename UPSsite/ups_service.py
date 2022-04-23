@@ -45,7 +45,10 @@ def recv_msg(fd, msg_type):
     buffer = []
     while True:
         print("buffer: {}".format(buffer))
-        buffer += fd.recv(1)
+        temp = fd.recv(1)
+        if not temp:
+            return temp
+        buffer += temp
         msg_len, pos = _DecodeVarint32(buffer, 0)
         if pos != 0:
             break
@@ -290,6 +293,7 @@ def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
             if not a_msg:  # amazon close connection
+                print("amazon close connection")
                 return
             print("receive a_msg: {}".format(a_msg))
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
