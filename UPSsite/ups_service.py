@@ -289,6 +289,8 @@ def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
+            if not a_msg:  # amazon close connection
+                return
             print("receive a_msg: {}".format(a_msg))
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
             handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
