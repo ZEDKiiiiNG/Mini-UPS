@@ -197,8 +197,8 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             db.updateTruckstatus(truck_id, status)
             if status == ARRIVE_WAREHOUSE:
                 package_id = db.updatePackagestatusAccordingTruck(truck_id, x, y)[0]
+                print("package id : {} arrived".format(package_id))
                 send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
-                print("send arrive")
     return
 
 
@@ -278,24 +278,24 @@ def handle_error(fd, ack_seqs, msg, msg_type):
     return
 
 
-def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id):
+def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs, world_id):
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
             print("receive a_msg: {}".format(a_msg))
-            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
-            handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
+            handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
+            handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
             handle_acks(a_msg, exp_seqs)
-            handle_error(amazon_fd, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
+            handle_error(amazon_fd, amazon_ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
             for w_msg in w_msgs:
                 print("receive w_msg: {}".format(w_msg))
-                handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
-                handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
+                handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, world_ack_seqs, w_msg)
+                handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, world_ack_seqs, w_msg)
                 handle_acks(w_msg, exp_seqs)
-                handle_error(world_fd, ack_seqs, w_msg, world_ups_pb2.UCommands)
+                handle_error(world_fd, world_ack_seqs, w_msg, world_ups_pb2.UCommands)
                 handle_finish(world_fd, w_msg, world_id)
         handle_resend(exp_seqs)
     return
@@ -304,7 +304,8 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id):
 def main():
     print("ups running..")
     curr_seq = [0]
-    ack_seqs = set()
+    amazon_ack_seqs = set()
+    world_ack_seqs = set()
     exp_seqs = {}
     listen_fd = build_server(UPS_HOST, UPS_PORT)
     amazon_fd, _ = listen_fd.accept()
@@ -312,7 +313,7 @@ def main():
     world_fd = build_client(WORLD_HOST, WORLD_PORT)
     world_id = connect_world(world_fd)
     send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
-    run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id)
+    run_service(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs, world_id)
     return
 
 
