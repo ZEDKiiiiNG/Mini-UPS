@@ -196,15 +196,15 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             status = completion.status
             db.updateTruckstatus(truck_id, status)
             if status == ARRIVE_WAREHOUSE:
-                package_ids = db.updatePackagestatusAccordingTruck(truck_id, x, y)
-                send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids)
+                package_id = db.updatePackagestatusAccordingTruck(truck_id, x, y)[0]
+                send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
 
-def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_ids):
+def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id):
     u_msg = amazon_ups_pb2.UMsg()
-    for package_id in package_ids:
-        u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
+    #for package_id in package_ids:
+    u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
     send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
 
@@ -233,8 +233,10 @@ def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
 def handle_finish(world_fd, w_finish_msg, world_id):
     if w_finish_msg.HasField("finished") and w_finish_msg.finished:
         print("handle finish, {}".format(w_finish_msg))
+        time.sleep(2)
         send_reconnect(world_fd, world_id)
-        w_conn_msg = recv_stream_msg(world_fd, world_ups_pb2.UConnected)[0]
+        time.sleep(2)
+        w_conn_msg = recv_msg(world_fd, world_ups_pb2.UConnected)
         print("reconnect msg: {}".format(w_conn_msg))
         world_id = w_conn_msg.worldid
         result = w_conn_msg.result
