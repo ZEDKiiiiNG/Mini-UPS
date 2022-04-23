@@ -230,9 +230,16 @@ def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
 
 
 # WORLD CASE 3
-def handle_finish(world_fd, w_msg, world_id):
-    if w_msg.HASFIELD("finished") and w_msg.finished:
+def handle_finish(world_fd, w_finish_msg, world_id):
+    if w_finish_msg.HASFIELD("finished") and w_finish_msg.finished:
+        print("handle finish, {}".format(w_finish_msg))
         send_reconnect(world_fd, world_id)
+        w_conn_msg = recv_msg(world_fd, world_ups_pb2.UConnected)
+        world_id = w_conn_msg.worldid
+        result = w_conn_msg.result
+        if result != CONNECTED:
+            print("error: {}".format(result))
+        print("reconnect to world id: {}".format(world_id))
     return
 
 
