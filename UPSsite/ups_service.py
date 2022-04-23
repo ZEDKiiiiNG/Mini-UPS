@@ -6,7 +6,7 @@ from constant import *
 import amazon_ups_pb2
 import time
 import select
-import modelsInterface as db
+# import modelsInterface as db
 from multiprocessing import Process
  
 
@@ -75,7 +75,7 @@ def connect_world(world_fd):
     for i in range(TRUCK_NUM):
         truck_id, x, y = i, i, i
         u_msg.trucks.add(id=truck_id, x=x, y=y)
-        db.createTruck(truck_id, x, y, IDLE)
+        # db.createTruck(truck_id, x, y, IDLE)
     send_msg(world_fd, u_msg)
     # ups receive UConnected from world
     w_msg = recv_msg(world_fd, world_ups_pb2.UConnected)
@@ -120,22 +120,23 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
         send_ack(amazon_fd, seq, amazon_ups_pb2.UMsg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
-            truck_id = get_pickup_truck()
+            # truck_id = get_pickup_truck()
+            truck_id = 0
             whid = truck_req.wh.id
             package_id = truck_req.packageid
-            db.savePackage(truck_id, truck_req)
-            db.updateTruckstatus(truck_id, TRAVELING)
+            # db.savePackage(truck_id, truck_req)
+            # db.updateTruckstatus(truck_id, TRAVELING)
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
 
 
-def get_pickup_truck():
-    truck_id = -1
-    while truck_id == -1:
-        truck_id = db.getPickupTruck()
-        time.sleep(RETRY_INTERVAL)
-    return truck_id
+# def get_pickup_truck():
+#     truck_id = -1
+#     while truck_id == -1:
+#         truck_id = db.getPickupTruck()
+#         time.sleep(RETRY_INTERVAL)
+#     return truck_id
 
 
 def send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid):
@@ -163,8 +164,8 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         dest_y = deliver_req.dest_y
         if seq not in ack_seqs:
             ack_seqs.add(seq)
-            dest_x, dest_y = get_dest(dest_x, dest_y, package_id)
-            db.updatePackagestatus(package_id, OUT_FOR_DELIVERY)
+            # dest_x, dest_y = get_dest(dest_x, dest_y, package_id)
+            # db.updatePackagestatus(package_id, OUT_FOR_DELIVERY)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
 
@@ -195,9 +196,10 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             x = completion.x
             y = completion.y
             status = completion.status
-            db.updateTruckstatus(truck_id, status)
+            # db.updateTruckstatus(truck_id, status)
             if status == ARRIVE_WAREHOUSE:
-                package_id = db.updatePackagestatusAccordingTruck(truck_id, x, y)[0]
+                # package_id = db.updatePackagestatusAccordingTruck(truck_id, x, y)[0]
+                package_id = 2
                 print("package id : {} arrived".format(package_id))
                 send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
@@ -219,7 +221,7 @@ def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             package_id = delivered.packageid
-            db.updatePackagestatus(package_id, DELIVERED)
+            # db.updatePackagestatus(package_id, DELIVERED)
             send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id)
     return
 
