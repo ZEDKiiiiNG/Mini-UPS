@@ -44,8 +44,10 @@ def recv_stream_msg(fd, msg_type):
 def recv_msg(fd, msg_type):
     buffer = []
     while True:
-        print("buffer: {}".format(buffer))
-        buffer += fd.recv(1)
+        temp = fd.recv(1)
+        if not temp:
+            return temp
+        buffer += temp
         msg_len, pos = _DecodeVarint32(buffer, 0)
         if pos != 0:
             break
@@ -53,6 +55,7 @@ def recv_msg(fd, msg_type):
     msg_str = fd.recv(msg_len)
     msg.ParseFromString(msg_str)
     return msg
+
 
 
 def build_server(host, port):
@@ -83,6 +86,7 @@ def connect_world(world_fd):
     result = w_msg.result
     if result != CONNECTED:
         print("error: {}".format(result))
+        return connect_world(world_fd)
     print("world id: {}".format(world_id))
     return world_id
 
@@ -234,12 +238,8 @@ def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
 # WORLD CASE 3
 def handle_finish(world_fd, w_finish_msg, world_id):
     if w_finish_msg.HasField("finished") and w_finish_msg.finished:
-        print("handle finish, {}".format(w_finish_msg))
-        time.sleep(2)
         send_reconnect(world_fd, world_id)
-        time.sleep(2)
         w_conn_msg = recv_msg(world_fd, world_ups_pb2.UConnected)
-        print("reconnect msg: {}".format(w_conn_msg))
         world_id = w_conn_msg.worldid
         result = w_conn_msg.result
         if result != CONNECTED:
@@ -287,6 +287,9 @@ def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
             a_msg = recv_msg(amazon_fd, amazon_ups_pb2.AMsg)
+            if not a_msg:  # amazon close connection
+                print("amazon close connection")
+                return
             print("receive a_msg: {}".format(a_msg))
             handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
             handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, a_msg)
@@ -303,6 +306,7 @@ def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
                 handle_finish(world_fd, w_msg, world_id)
         handle_resend(exp_seqs)
     return
+
 
 
 def main():
