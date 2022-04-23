@@ -198,6 +198,7 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             if status == ARRIVE_WAREHOUSE:
                 package_id = db.updatePackagestatusAccordingTruck(truck_id, x, y)[0]
                 send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
+                print("send arrive")
     return
 
 
