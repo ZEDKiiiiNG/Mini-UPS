@@ -303,18 +303,13 @@ def main():
     curr_seq = [0]
     ack_seqs = set()
     exp_seqs = {}
-    try:
-        listen_fd = build_server(UPS_HOST, UPS_PORT)
-        amazon_fd, _ = listen_fd.accept()
-        # TODO open thread to serve each amazon
-        world_fd = build_client(WORLD_HOST, WORLD_PORT)
-        world_id = connect_world(world_fd)
-        send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
-        run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id)
-    except (KeyboardInterrupt, Exception):
-        listen_fd.close()
-        amazon_fd.close()
-        print("Exception: {}".format((Exception)))
+    listen_fd = build_server(UPS_HOST, UPS_PORT)
+    amazon_fd, _ = listen_fd.accept()
+    # TODO open thread to serve each amazon
+    world_fd = build_client(WORLD_HOST, WORLD_PORT)
+    world_id = connect_world(world_fd)
+    send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
+    run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id)
     return
 
 
