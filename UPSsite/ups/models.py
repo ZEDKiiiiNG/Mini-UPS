@@ -31,7 +31,8 @@ class Package(models.Model):
 
 
 class Product(models.Model):
-    productId = models.IntegerField(default=-1,unique=True)
+    id = models.AutoField(primary_key=True)
+    productId = models.IntegerField(default=-1)
     productDescrip = models.CharField(max_length=100, default='', null=True)
     productCount = models.IntegerField(default=-1)
     package = models.ForeignKey(Package, on_delete=models.CASCADE, null=True)
