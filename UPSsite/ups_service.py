@@ -224,7 +224,7 @@ def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
 
 def send_deliver_resp(amazon_fd, curr_seq, exp_seqs, package_id):
     u_msg = amazon_ups_pb2.UMsg()
-    u_msg.delivered.add(pacakgeid=package_id, seqnum=curr_seq[0])
+    u_msg.delivered.add(packageid=package_id, seqnum=curr_seq[0])
     send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
 
