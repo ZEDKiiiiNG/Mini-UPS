@@ -7,6 +7,7 @@ import amazon_ups_pb2
 import time
 import select
 import modelsInterface as db
+from multiprocessing import Process
  
 
 def send_msg(fd, msg):
@@ -278,7 +279,10 @@ def handle_error(fd, ack_seqs, msg, msg_type):
     return
 
 
-def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs, world_id):
+def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
+    world_fd = build_client(WORLD_HOST, WORLD_PORT)
+    world_id = connect_world(world_fd)
+    send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
     while True:
         ready_fds, _, _ = select.select([world_fd, amazon_fd], [], [], 0)
         if amazon_fd in ready_fds:
@@ -308,12 +312,9 @@ def main():
     world_ack_seqs = set()
     exp_seqs = {}
     listen_fd = build_server(UPS_HOST, UPS_PORT)
-    amazon_fd, _ = listen_fd.accept()
-    # TODO open thread to serve each amazon
-    world_fd = build_client(WORLD_HOST, WORLD_PORT)
-    world_id = connect_world(world_fd)
-    send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
-    run_service(world_fd, amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs, world_id)
+    while True:
+        amazon_fd, _ = listen_fd.accept()
+        Process(target=run_service, args=(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs)).start()
     return
 
 
