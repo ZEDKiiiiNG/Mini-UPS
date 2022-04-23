@@ -187,7 +187,7 @@ def get_dest(dest_x, dest_y, package_id):
 def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     for completion in w_msg.completions:
         seq = completion.seqnum
-        send_ack(world_fd, seq, world_ups_pb2.UResponses)
+        send_ack(world_fd, seq, world_ups_pb2.UCommands)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             truck_id = completion.truckid
@@ -213,7 +213,7 @@ def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id):
 def handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
     for delivered in w_msg.delivered:
         seq = delivered.seqnum
-        send_ack(world_fd, seq, world_ups_pb2.UResponses)
+        send_ack(world_fd, seq, world_ups_pb2.UCommands)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             package_id = delivered.packageid
@@ -289,9 +289,8 @@ def run_service(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, world_id):
             handle_error(amazon_fd, ack_seqs, a_msg, amazon_ups_pb2.UMsg)
         if world_fd in ready_fds:
             w_msgs = recv_stream_msg(world_fd, world_ups_pb2.UResponses)
-            if not w_msgs:
-                print("receive w_msgs: {}".format(w_msgs))
             for w_msg in w_msgs:
+                print("receive w_msg: {}".format(w_msg))
                 handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_delivered(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg)
                 handle_acks(w_msg, exp_seqs)
