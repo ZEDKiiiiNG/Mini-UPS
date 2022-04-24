@@ -170,6 +170,7 @@ def handle_deliver_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg)
         if seq not in ack_seqs:
             ack_seqs.add(seq)
             dest_x, dest_y = get_dest(dest_x, dest_y, package_id)
+            db.updateTruckstatus(truck_id, DELIVERING)
             db.updatePackagestatus(package_id, OUT_FOR_DELIVERY)
             send_deliver(world_fd, curr_seq, exp_seqs, truck_id, package_id, dest_x, dest_y)
     return
