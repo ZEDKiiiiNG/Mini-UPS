@@ -126,9 +126,11 @@ def handle_truck_req(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, a_msg):
             ack_seqs.add(seq)
             truck_id = get_pickup_truck()
             whid = truck_req.wh.id
+            whx = truck_req.wh.x
+            why = truck_req.wh.y
             package_id = truck_req.packageid
             db.savePackage(truck_id, truck_req)
-            db.updateTruckstatus(truck_id, TRAVELING)
+            db.updateTruckstatusAndLocation(truck_id, TRAVELING, whx, why)
             send_pickup(world_fd, curr_seq, exp_seqs, truck_id, whid)
             send_truck_sent(amazon_fd, curr_seq, exp_seqs, truck_id, package_id)
     return
@@ -199,7 +201,7 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
             x = completion.x
             y = completion.y
             status = completion.status
-            db.updateTruckstatus(truck_id, status)
+            db.updateTruckstatusAndLocation(truck_id, status, x, y)
             if status == ARRIVE_WAREHOUSE:
                 package_id = db.updatePackagestatusAccordingTruck(truck_id, x, y)[0]
                 print("package id : {} arrived".format(package_id))
@@ -209,7 +211,6 @@ def handle_completion(world_fd, amazon_fd, curr_seq, exp_seqs, ack_seqs, w_msg):
 
 def send_truck_arrived(amazon_fd, curr_seq, exp_seqs, truck_id, package_id):
     u_msg = amazon_ups_pb2.UMsg()
-    #for package_id in package_ids:
     u_msg.truckarrived.add(truckid=truck_id, packageid=package_id, seqnum=curr_seq[0])
     send_msg_with_seq(amazon_fd, u_msg, curr_seq, exp_seqs)
     return
