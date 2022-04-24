@@ -1,0 +1,138 @@
+{#login/templates/login/index.html#}
+
+{% extends 'login/base.html' %}
+{% block title %}Home page{% endblock %}
+{% block content %}
+<h2><div style="width:100%;text-align:center"> Search Shipment
+        </div></h2>
+    <div style="width:100%;text-align:center">
+          <form method="POST" class="form-group" >
+        {% csrf_token %}
+       {{serachForm.as_p}}
+        <button type="submit" class="btn btn-primary" name="Search">Search</button>
+      </form>
+    </div>
+    {% if message %}
+        <div class="alert alert-warning">{{ message }}</div>
+    {% endif %}
+    {% if searchListLen != 0 %}
+        <table class="table table-bordered table-hover">
+
+        <thead>
+
+{#          <th><div style="width:100%;text-align:center"></div></th>#}
+          <th><div style="width:100%;text-align:center"> Package Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse location</div></th>
+          <th><div style="width:100%;text-align:center"> Destination location </div></th>
+          <th><div style="width:100%;text-align:center"> Truck  </div></th>
+          <th><div style="width:100%;text-align:center"> Package Status </div></th>
+          <th><div style="width:100%;text-align:center"> Package details </div></th>
+            <th><div style="width:100%;text-align:center"> Operation </div></th>
+      <th></th>
+          </tr>
+        </thead>
+        <tbody>
+    {% for package_item in searchList %}
+   <tr>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whX}}, {{package_item.whY}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.destX}}, {{package_item.destY}}</div></td>
+          <td><div style="width:100%;text-align:center"> ID: {{package_item.truck.truckId}}, Status: {{package_item.truck.truckStatus}} </div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgStatus}} </div></td>
+            <td><div style="width:100%;text-align:center">
+                {% for product_item in searchItemProducts %}
+                Product Id: {{product_item.productId}}, Product description: {{product_item.productDescrip}}, Product Count: {{product_item.productCount}}
+                {% endfor %}
+            </div></td>
+       {% if is_log_in != True%}
+       <td><div style="width:100%;text-align:center">
+           plase log in first
+       </div></td>
+       {% else %}
+           {% if package_item.user.name != 'default_user' %}
+           <td><div style="width:100%;text-align:center">
+               This pacakge belongs to someone cannot be added
+           </div></td>
+           {% else %}
+           <td><div style="width:100%;text-align:center">
+
+        <form method="POST">
+            {% csrf_token %}
+        <button type="submit" class="btn btn-primary" name="addAsOwn" value= {{ package_item.pkgId }}>Add as Own</button>
+        </form>
+           </div></td>
+           {% endif %}
+       {% endif %}
+    </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    <div style="width:100%;height:100%;text-align:center">
+        {{ graph|safe }}
+    </div>
+{% endif %}
+    {% if request.session.is_login %}
+<div class="container-fluid">
+<div style="width:100%;text-align:center" >
+    <h1>Hello,{{ request.session.user_name }}！Welcome back！！</h1>
+</div>
+</div>
+<h2><div style="width:100%;text-align:center"> Your own shipment
+        </div></h2>
+
+        <table class="table table-bordered table-hover">
+
+        <thead>
+
+{#          <th><div style="width:100%;text-align:center"></div></th>#}
+          <th><div style="width:100%;text-align:center"> Package Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse Id</div></th>
+          <th><div style="width:100%;text-align:center"> Warehouse location</div></th>
+          <th><div style="width:100%;text-align:center"> Destination location </div></th>
+          <th><div style="width:100%;text-align:center"> Truck  </div></th>
+          <th><div style="width:100%;text-align:center"> Package Status </div></th>
+            <th><div style="width:100%;text-align:center"> Package details </div></th>
+          <th><div style="width:100%;text-align:center"> Operation </div></th>
+      <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+  {% for package_item in pkgs_list %}
+   <tr>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whId}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.whX}}, {{package_item.whY}}</div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.destX}}, {{package_item.destY}}</div></td>
+          <td><div style="width:100%;text-align:center"> ID: {{package_item.truck.truckId}}, Status: {{package_item.truck.truckStatus}} </div></td>
+          <td><div style="width:100%;text-align:center">{{package_item.pkgStatus}} </div></td>
+       <td><div style="width:100%;text-align:center">
+           {% for product_item in package_item.product_set.all %}
+                Product Id: {{product_item.productId}}, Product description: {{product_item.productDescrip}}, Product Count: {{product_item.productCount}}
+            {% endfor %}
+       </div></td>
+        {% if package_item.pkgStatus != 'out for delivery' %}
+      <td><div style="width:100%;text-align:center">
+          <form method="POST" class="form-group" >
+        {% csrf_token %}
+       {{change_form.as_p}}
+        <button type="submit" class="btn btn-primary" name="Change" value= {{ package_item.pkgId }}>Change destination</button>
+      </form>
+      </div>
+    </td>
+        {% else %}
+        <td><div style="width:100%;text-align:center">Pacakge is out for delivery </div></td>
+        {% endif %}
+
+    </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+
+    {% else %}
+    <h1>Please Log in to view your own shipment！</h1>
+    {% endif %}
+{% endblock %}
