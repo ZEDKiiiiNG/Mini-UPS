@@ -319,9 +319,8 @@ def run_service(amazon_fd):
 def main():
     print("ups running..")
     listen_fd = build_server(UPS_HOST, UPS_PORT)
-    while True:
-        amazon_fd, _ = listen_fd.accept()
-        Process(target=run_service, args=(amazon_fd, )).start()
+    amazon_fd, _ = listen_fd.accept()
+    run_service(amazon_fd)
     return
 
 
