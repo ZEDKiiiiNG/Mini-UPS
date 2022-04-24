@@ -4,6 +4,41 @@ from . import models
 from django.shortcuts import render,redirect
 from django.db.models import Q
 from .forms import UserForm, RegisterForm, ChangeDestinationForm, SearchPackageForm
+
+
+import matplotlib.pyplot as plt
+from io import StringIO
+import numpy as np
+
+def return_graph(searchItem):
+    whX = searchItem.whX
+    whY = searchItem.whY
+    destX = searchItem.destX
+    destY = searchItem.destY
+    truck = searchItem.truck
+    truckX = truck.truckX
+    truckY = truck.truckY
+
+    fig = plt.figure()
+    wharehouseplt = plt.scatter(whX,whY)
+    destinationplt = plt.scatter(destX,destY)
+    truckplt = plt.scatter(truckX,truckY)
+    plt.grid(color='b', ls = '-.', lw = 0.25)
+    plt.legend(handles=[wharehouseplt, destinationplt, truckplt], labels=['Warehouse','destination', 'truck' ], loc='upper right')  # 设置图例中显示的内容
+    plt.ylim(ymin=0, ymax=12)
+    plt.xlim(xmin=0, xmax=12)
+    plt.xlabel('World x position', fontdict={"family": "Times New Roman"})
+    plt.ylabel('World y position', fontdict={"family": "Times New Roman"})
+    plt.title('Package Location')
+    imgdata = StringIO()
+    fig.savefig(imgdata, format='svg')
+    imgdata.seek(0)
+
+    data = imgdata.getvalue()
+    return data
+
+
+
 def index(request):
     serachForm = SearchPackageForm()
     is_log_in  = request.session.get('is_login', False)
@@ -13,10 +48,12 @@ def index(request):
             if serachForm.is_valid():
                 searchId = serachForm.cleaned_data['pkgId']
                 searchList = models.Package.objects.filter(pkgId=searchId)
-                if len(searchList) == 0:
+                searchListLen = len(searchList)
+                if searchListLen == 0:
                     message = "No matched package found！"
                     return render(request, 'login/index.html', locals())
                 searchItem = models.Package.objects.get(pkgId=searchId)
+                graph = return_graph(searchItem)
                 searchItemProducts = models.Product.objects.filter(package = searchItem)
         if 'addAsOwn' in request.POST and is_log_in:
             username = request.session.get('user_name', None)
