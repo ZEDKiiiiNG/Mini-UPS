@@ -103,6 +103,11 @@ def updatePackagestatus(pkgId, pkgStatus):
 def getDest(pkgId):
     package = ups.models.Package.objects.get(pkgId=pkgId)
     return [package.destX, package.destY]
+def updateDest(pkgId, new_destX, new_destY):
+    package = ups.models.Package.objects.get(pkgId=pkgId)
+    package.destX = new_destX
+    package.destY = new_destY
+    package.save()
 
 
 if __name__ == '__main__':
