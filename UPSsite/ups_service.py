@@ -279,7 +279,12 @@ def handle_error(fd, ack_seqs, msg, msg_type):
     return
 
 
-def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
+def run_service(amazon_fd):
+    curr_seq = [0]
+    amazon_ack_seqs = set()
+    world_ack_seqs = set()
+    exp_seqs = {}
+
     world_fd = build_client(WORLD_HOST, WORLD_PORT)
     world_id = connect_world(world_fd)
     send_world_id(amazon_fd, world_id, curr_seq, exp_seqs)
@@ -311,14 +316,10 @@ def run_service(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs):
 
 def main():
     print("ups running..")
-    curr_seq = [0]
-    amazon_ack_seqs = set()
-    world_ack_seqs = set()
-    exp_seqs = {}
     listen_fd = build_server(UPS_HOST, UPS_PORT)
     while True:
         amazon_fd, _ = listen_fd.accept()
-        Process(target=run_service, args=(amazon_fd, curr_seq, exp_seqs, amazon_ack_seqs, world_ack_seqs)).start()
+        Process(target=run_service, args=(amazon_fd, )).start()
     return
 
 
