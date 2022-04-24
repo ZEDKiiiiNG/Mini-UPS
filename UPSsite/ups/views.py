@@ -23,11 +23,12 @@ def return_graph(searchItem):
     wharehouseimg = mpimg.imread('./ups/Warehouse.png')
     destinationimg = mpimg.imread('./ups/destination.png')
     truckimagebox = OffsetImage(truckimg, zoom=0.3)
-    wharehouseimagebox = OffsetImage(wharehouseimg, zoom=0.3)
-    destinationimagebox = OffsetImage(destinationimg, zoom=0.3)
+    wharehouseimagebox = OffsetImage(wharehouseimg, zoom=0.5)
+    destinationimagebox = OffsetImage(destinationimg, zoom=0.5)
+
     ab_destination = AnnotationBbox(destinationimagebox, (destX, destY))
     ab_wharehouse = AnnotationBbox(wharehouseimagebox, (whX, whY))
-    ab_truck = AnnotationBbox(truckimagebox, (truckX, truckY))
+    ab_truck = AnnotationBbox(truckimagebox, (truckX, truckY), frameon=False, xycoords='data', boxcoords="offset points",pad=0)
 
     fig, ax = plt.subplots()
     wharehouseplt = plt.scatter(whX,whY)
@@ -35,9 +36,9 @@ def return_graph(searchItem):
     truckplt = plt.scatter(truckX,truckY)
     plt.plot([whX, truckX], [whY, truckY], color='red', linestyle=':')
     plt.plot([truckX, destX], [truckY, destY], color='navy', linestyle='--')
-    ax.add_artist(ab_truck)
     ax.add_artist(ab_wharehouse)
     ax.add_artist(ab_destination)
+    ax.add_artist(ab_truck)
     plt.grid(color='b', ls = '-.', lw = 0.25)
     # plt.legend(handles=[wharehouseplt, destinationplt, truckplt], labels=['Warehouse','destination', 'truck' ], loc='upper right')  # 设置图例中显示的内容
     plt.ylim(ymin=0, ymax=12)
