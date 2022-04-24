@@ -1,0 +1,73 @@
+syntax = "proto2";
+
+message Exception{
+    required string err = 1;
+    required int32 originseqnum = 2;
+    required int32 seqnum = 3;
+}
+
+message Warehouse {
+  required int32 id = 1;
+  required int32 x = 2;
+  required int32 y = 3;
+}
+
+message Product{
+  required int64 id = 1;
+  required string description = 2;
+  required int32 count = 3;
+}
+
+message ATruckReq {
+    required Warehouse wh = 1;
+    optional string upsaccount = 2;
+    required int64 packageid = 3;
+     repeated Product things = 4;
+    required int32 seqnum = 5;
+}
+
+message ADeliverReq {
+    required int64 packageid = 1;
+    required int32 truckid = 2;
+    required int32 dest_x = 3;
+    required int32 dest_y = 4;
+    required int32 seqnum = 5;
+}
+
+message UDeliverRsp{
+    required int64 packageid = 1;
+    required int32 seqnum = 2;
+}
+
+message UTruckSent{
+    required int32 truckid = 1;
+    required int64 packageid = 2;
+    required int32 seqnum = 3;
+}
+
+message UTruckArrived{
+    required int32 truckid = 1;
+    required int64 packageid = 2;
+    required int32 seqnum = 3;
+}
+
+message U2AWorldId {
+    required int32 worldid = 1;
+    required int32 seqnum = 2;
+}
+
+message AMsg {
+    repeated ATruckReq truckreq = 1;
+    repeated ADeliverReq deliverreq = 2;
+    repeated int32 acks = 3;
+    repeated Exception error = 4;
+}
+
+message UMsg {
+    repeated UDeliverRsp delivered = 1;
+    repeated UTruckSent trucksent = 2;
+    repeated UTruckArrived truckarrived = 3;
+    repeated U2AWorldId worldid = 4;
+    repeated int32 acks = 5;
+    repeated Exception error = 6;
+}
