@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-87s+$kxnm2zvt^$=%_w@xu-l4sa(l+!(*8)@45se9ahq6&$pe2
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['web', 'vcm-24667.vm.duke.edu', '127.0.0.1']
+ALLOWED_HOSTS = ['web', 'vcm-24667.vm.duke.edu', 'vcm-24846.vm.duke.edu', '127.0.0.1']
 # email settings
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -135,5 +135,5 @@ STATICFILES_DIRS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-CSRF_TRUSTED_ORIGINS = ['http://*.vcm-24667.vm.duke.edu:8000','http://*.127.0.0.1:8000']
+CSRF_TRUSTED_ORIGINS = ['http://*.vcm-24667.vm.duke.edu:8000', 'http://*.vcm-24846.vm.duke.edu:8000', 'http://*.127.0.0.1:8000']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
