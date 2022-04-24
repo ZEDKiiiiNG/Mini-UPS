@@ -314,7 +314,6 @@ def run_service(amazon_fd):
     return
 
 
-
 def main():
     print("ups running..")
     listen_fd = build_server(UPS_HOST, UPS_PORT)
